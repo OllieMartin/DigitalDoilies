@@ -12,14 +12,15 @@ public class DigitalDoiliesPanel extends JPanel {
 	
 	public DigitalDoiliesPanel() {
 		this.setLayout(new BoxLayout(this,BoxLayout.LINE_AXIS));
+		this.setPreferredSize(new Dimension(500,500));
+		this.setMinimumSize(new Dimension(300,300));
+		
 		drawingPanel = new DrawingPanel(12);
-		controlPanel = new ControlPanel();
+		controlPanel = new ControlPanel(drawingPanel);
 		galleryPanel = new GalleryPanel();
 		this.add(controlPanel);
 		this.add(drawingPanel);
 		this.add(galleryPanel);
-		this.setPreferredSize(new Dimension(500,500));
-		this.setMinimumSize(new Dimension(300,300));
 	}
 	
 }
