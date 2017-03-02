@@ -3,6 +3,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
@@ -17,6 +18,7 @@ public class ControlPanel extends JPanel {
 	private JSlider sectorSlider;
 	private JSlider brushSlider;
 	private JButton undoButton;
+	private JColorChooser colourChooser;
 	
 	public ControlPanel(DrawingPanel drawingPanel) {
 		
@@ -52,7 +54,7 @@ public class ControlPanel extends JPanel {
 			
 		});
 		
-		brushSlider = new JSlider(1,Math.max(10,drawingPanel.getBrushSize()),drawingPanel.getBrushSize());
+		brushSlider = new JSlider(2,Math.max(20,drawingPanel.getBrushSize()),drawingPanel.getBrushSize());
 		brushSlider.addChangeListener(new ChangeListener() {
 
 			@Override
@@ -72,11 +74,22 @@ public class ControlPanel extends JPanel {
 			
 		});
 		
+		colourChooser = new JColorChooser();
+		colourChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				drawingPanel.setBrushColour(colourChooser.getColor());
+			}
+			
+		});
+		
 		this.add(reflectButton);
 		this.add(clearButton);
 		this.add(sectorSlider);
 		this.add(brushSlider);
 		this.add(undoButton);
+		this.add(colourChooser);
 	}
 	
 }

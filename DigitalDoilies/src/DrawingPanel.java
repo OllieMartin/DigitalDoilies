@@ -14,16 +14,43 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class DrawingPanel extends JPanel {
 	
+	//
+	
+	private class DrawnPoint extends Point {
+		
+		private int brushSize;
+		private Color colour;
+		
+		public DrawnPoint(int x, int y, int brushSize, Color colour) {
+			super(x,y);
+			this.colour = colour;
+			this.brushSize = brushSize;
+		}
+		
+		public int getBrushSize() {
+			return this.brushSize;
+		}
+		
+		public Color getColour() {
+			return this.colour;
+		}
+		
+	}
+	
+	//
+	
 	private int numberOfSectors;
-	private Stack<List<Point>> points = new Stack<List<Point>>();
-	private List<Point> currentStroke = new ArrayList<Point>();
+	private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>();
+	private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>();
 	private boolean reflect;
 	private int brushSize;
+	private Color brushColour;
 	
 	public DrawingPanel(int defaultNumberOfSectors) {
 		reflect = false;
 		numberOfSectors = 0;
 		brushSize = 5;
+		brushColour = Color.WHITE;
 		this.setBackground(Color.BLACK);
 		this.setPreferredSize(new Dimension(400,400));
 		this.setMinimumSize(new Dimension(200,200));
@@ -32,9 +59,9 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				super.mouseDragged(e);
-				currentStroke.add(new Point(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
+				currentStroke.add(new DrawnPoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), brushSize, brushColour));
 				if (reflect) {
-					currentStroke.add(new Point(e.getX() - getWidth()/2, getHeight()/2 - e.getY()));
+					currentStroke.add(new DrawnPoint(e.getX() - getWidth()/2, getHeight()/2 - e.getY(), brushSize, brushColour));
 				}
 				repaint();
 			}
@@ -45,7 +72,7 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
-				points.push(new ArrayList<Point>(currentStroke));
+				points.push(new ArrayList<DrawnPoint>(currentStroke));
 				currentStroke.clear();
 				repaint();
 			}
@@ -67,6 +94,15 @@ public class DrawingPanel extends JPanel {
 	
 	public void setBrushSize(int brushSize) {
 		this.brushSize = brushSize;
+		repaint();
+	}
+	
+	public Color getBrushColour() {
+		return brushColour;
+	}
+	
+	public void setBrushColour(Color colour) {
+		this.brushColour = colour;
 		repaint();
 	}
 	
@@ -99,34 +135,36 @@ public class DrawingPanel extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		
-		Stack<List<Point>> popped = new Stack<List<Point>>();
-		List<Point> stroke = new ArrayList<Point>();
+		Stack<List<DrawnPoint>> popped = new Stack<List<DrawnPoint>>();
+		List<DrawnPoint> stroke = new ArrayList<DrawnPoint>();
 		
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
-		
 		g2.setColor(Color.WHITE);
 		
 		for (int i = 0; i < numberOfSectors; i++) {
+			g2.setColor(Color.WHITE);
 			//System.out.println(this.getWidth()/2 + " " + this.getHeight()/2+ " " + this.getWidth()/2+ " " + this.getHeight()/6);
 			g.drawLine(this.getWidth()/2, this.getHeight()/2, this.getWidth()/2, this.getHeight()/6);
 			//System.out.println(Math.PI*2/numberOfSectors + " " +  this.getWidth()/2 + " " + this.getHeight()/2);
 			
 			while (!points.isEmpty()) {
 				stroke = points.pop();
-				for (Point p : stroke) {
-					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, brushSize, brushSize);
-				}
 				popped.push(stroke);
-			}
-			
-			for (Point p : currentStroke) {
-				g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, brushSize, brushSize);
 			}
 			
 			while (!popped.isEmpty()) {
 				stroke = popped.pop();
+				for (DrawnPoint p : stroke) {
+					g2.setColor(p.getColour());
+					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+				}
 				points.push(stroke);
+			}
+			
+			for (DrawnPoint p : currentStroke) {
+				g2.setColor(p.getColour());
+				g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
 			}
 			
 			g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
