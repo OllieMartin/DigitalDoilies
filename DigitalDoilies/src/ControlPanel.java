@@ -18,7 +18,7 @@ public class ControlPanel extends JPanel {
 	private JSlider sectorSlider;
 	private JSlider brushSlider;
 	private JButton undoButton;
-	private JColorChooser colourChooser;
+	private JButton colourButton;
 	
 	public ControlPanel(DrawingPanel drawingPanel) {
 		
@@ -74,12 +74,12 @@ public class ControlPanel extends JPanel {
 			
 		});
 		
-		colourChooser = new JColorChooser();
-		colourChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+		colourButton = new JButton("Change Brush Colour");
+		colourButton.addActionListener(new ActionListener() {
 
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				drawingPanel.setBrushColour(colourChooser.getColor());
+			public void actionPerformed(ActionEvent arg0) {
+				drawingPanel.setBrushColour(JColorChooser.showDialog(null, "Pick brush colour", drawingPanel.getBrushColour()));
 			}
 			
 		});
@@ -89,7 +89,7 @@ public class ControlPanel extends JPanel {
 		this.add(sectorSlider);
 		this.add(brushSlider);
 		this.add(undoButton);
-		this.add(colourChooser);
+		this.add(colourButton);
 	}
 	
 }
