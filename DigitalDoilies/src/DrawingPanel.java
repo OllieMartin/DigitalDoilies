@@ -1,3 +1,4 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -137,6 +138,7 @@ public class DrawingPanel extends JPanel {
 		
 		Stack<List<DrawnPoint>> popped = new Stack<List<DrawnPoint>>();
 		List<DrawnPoint> stroke = new ArrayList<DrawnPoint>();
+		Point lastPoint;
 		
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
@@ -157,22 +159,35 @@ public class DrawingPanel extends JPanel {
 		
 		while (!popped.isEmpty()) {
 			stroke = popped.pop();
+			lastPoint = null;
 			for (DrawnPoint p : stroke) {
 				g2.setColor(p.getColour());
 				for (int i = 0; i < numberOfSectors; i++) {
-					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+					//g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+					if (lastPoint != null) {
+						g2.setStroke(new BasicStroke(p.getBrushSize()));
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					}
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
 				}
+				lastPoint = p;
 			}
 			points.push(stroke);
 		}	
 			
+			lastPoint = null;
 			for (DrawnPoint p : currentStroke) {
 				g2.setColor(p.getColour());
 				for (int i = 0; i < numberOfSectors; i++) {
-					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+					//g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+					if (lastPoint != null) {
+						g2.setStroke(new BasicStroke(p.getBrushSize()));
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					}
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+					
 				}
+				lastPoint = p;
 			}
 		
 	}
