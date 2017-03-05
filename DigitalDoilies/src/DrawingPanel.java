@@ -143,33 +143,37 @@ public class DrawingPanel extends JPanel {
 		g2.setColor(Color.WHITE);
 		
 		for (int i = 0; i < numberOfSectors; i++) {
+			
 			g2.setColor(Color.WHITE);
-			//System.out.println(this.getWidth()/2 + " " + this.getHeight()/2+ " " + this.getWidth()/2+ " " + this.getHeight()/6);
 			g.drawLine(this.getWidth()/2, this.getHeight()/2, this.getWidth()/2, this.getHeight()/6);
-			//System.out.println(Math.PI*2/numberOfSectors + " " +  this.getWidth()/2 + " " + this.getHeight()/2);
-			
-			while (!points.isEmpty()) {
-				stroke = points.pop();
-				popped.push(stroke);
-			}
-			
-			while (!popped.isEmpty()) {
-				stroke = popped.pop();
-				for (DrawnPoint p : stroke) {
-					g2.setColor(p.getColour());
-					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
-				}
-				points.push(stroke);
-			}
-			
-			for (DrawnPoint p : currentStroke) {
-				g2.setColor(p.getColour());
-				g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
-			}
-			
 			g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
 			
 		}
+		
+		while (!points.isEmpty()) {
+			stroke = points.pop();
+			popped.push(stroke);
+		}
+		
+		while (!popped.isEmpty()) {
+			stroke = popped.pop();
+			for (DrawnPoint p : stroke) {
+				g2.setColor(p.getColour());
+				for (int i = 0; i < numberOfSectors; i++) {
+					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+			}
+			points.push(stroke);
+		}	
+			
+			for (DrawnPoint p : currentStroke) {
+				g2.setColor(p.getColour());
+				for (int i = 0; i < numberOfSectors; i++) {
+					g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
+					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+			}
 		
 	}
 	
