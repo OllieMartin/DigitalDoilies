@@ -165,7 +165,7 @@ public class DrawingPanel extends JPanel {
 				for (int i = 0; i < numberOfSectors; i++) {
 					//g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
 					if (lastPoint != null) {
-						g2.setStroke(new BasicStroke(p.getBrushSize()));
+						g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
 					}
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
@@ -181,7 +181,7 @@ public class DrawingPanel extends JPanel {
 				for (int i = 0; i < numberOfSectors; i++) {
 					//g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
 					if (lastPoint != null) {
-						g2.setStroke(new BasicStroke(p.getBrushSize()));
+						g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
 					}
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
