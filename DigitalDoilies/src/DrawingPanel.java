@@ -148,6 +148,12 @@ public void toggleSectors() {
 		}
 	}
 	
+	public BufferedImage getBufferedImage(int width) {
+		BufferedImage image = new BufferedImage(width,width,BufferedImage.TYPE_INT_RGB);
+		paintComponent(image.getGraphics());
+		return image;
+	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		

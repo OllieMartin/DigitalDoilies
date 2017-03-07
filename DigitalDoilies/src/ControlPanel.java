@@ -20,8 +20,9 @@ public class ControlPanel extends JPanel {
 	private JButton undoButton;
 	private JButton colourButton;
 	private JToggleButton sectorButton;
+	private JButton saveButton;
 	
-	public ControlPanel(DrawingPanel drawingPanel) {
+	public ControlPanel(DrawingPanel drawingPanel, GalleryPanel galleryPanel) {
 		
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		
@@ -96,6 +97,16 @@ public class ControlPanel extends JPanel {
 			
 		});
 		
+		saveButton = new JButton("Save");
+		saveButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				galleryPanel.addImage(drawingPanel.getBufferedImage(galleryPanel.getWidth()));	
+			}
+			
+		});
+		
 		this.add(reflectButton);
 		this.add(clearButton);
 		this.add(sectorSlider);
@@ -103,6 +114,7 @@ public class ControlPanel extends JPanel {
 		this.add(undoButton);
 		this.add(colourButton);
 		this.add(sectorButton);
+		this.add(saveButton);
 	}
 	
 }
