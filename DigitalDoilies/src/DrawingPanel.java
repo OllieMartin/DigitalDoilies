@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -148,10 +149,10 @@ public void toggleSectors() {
 		}
 	}
 	
-	public BufferedImage getBufferedImage(int width) {
-		BufferedImage image = new BufferedImage(width,width,BufferedImage.TYPE_INT_RGB);
+	public Image getBufferedImage(int width) {
+		BufferedImage image = new BufferedImage(getWidth(),getWidth(),BufferedImage.TYPE_INT_RGB);
 		paintComponent(image.getGraphics());
-		return image;
+		return image.getScaledInstance(width, width, Image.SCALE_DEFAULT);
 	}
 	
 	@Override
