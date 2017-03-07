@@ -21,11 +21,13 @@ public class DrawingPanel extends JPanel {
 		
 		private int brushSize;
 		private Color colour;
+		private boolean reflected;
 		
-		public DrawnPoint(int x, int y, int brushSize, Color colour) {
+		public DrawnPoint(int x, int y, int brushSize, Color colour, boolean reflected) {
 			super(x,y);
 			this.colour = colour;
 			this.brushSize = brushSize;
+			this.reflected = reflected;
 		}
 		
 		public int getBrushSize() {
@@ -34,6 +36,10 @@ public class DrawingPanel extends JPanel {
 		
 		public Color getColour() {
 			return this.colour;
+		}
+		
+		public boolean getReflected() {
+			return reflected;
 		}
 		
 	}
@@ -60,9 +66,9 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				super.mouseDragged(e);
-				currentStroke.add(new DrawnPoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), brushSize, brushColour));
+				currentStroke.add(new DrawnPoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), brushSize, brushColour, false));
 				if (reflect) {
-					currentStroke.add(new DrawnPoint(e.getX() - getWidth()/2, getHeight()/2 - e.getY(), brushSize, brushColour));
+					currentStroke.add(new DrawnPoint(e.getX() - getWidth()/2, getHeight()/2 - e.getY(), brushSize, brushColour, true));
 				}
 				repaint();
 			}
@@ -139,6 +145,8 @@ public class DrawingPanel extends JPanel {
 		Stack<List<DrawnPoint>> popped = new Stack<List<DrawnPoint>>();
 		List<DrawnPoint> stroke = new ArrayList<DrawnPoint>();
 		Point lastPoint;
+		Point previousLastPoint;
+		boolean reflectedStroke;
 		
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
@@ -157,18 +165,26 @@ public class DrawingPanel extends JPanel {
 			popped.push(stroke);
 		}
 		
+		
 		while (!popped.isEmpty()) {
 			stroke = popped.pop();
 			lastPoint = null;
+			previousLastPoint = null;
+			reflectedStroke = false;
 			for (DrawnPoint p : stroke) {
 				g2.setColor(p.getColour());
+				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (p.getReflected()) reflectedStroke = true;
 				for (int i = 0; i < numberOfSectors; i++) {
-					//g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
-					if (lastPoint != null) {
-						g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+					if (lastPoint != null && reflectedStroke == false) {
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
 					}
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+				if (lastPoint != null) {
+					previousLastPoint = lastPoint;
 				}
 				lastPoint = p;
 			}
@@ -176,16 +192,22 @@ public class DrawingPanel extends JPanel {
 		}	
 			
 			lastPoint = null;
+			previousLastPoint = null;
+			reflectedStroke = false;
 			for (DrawnPoint p : currentStroke) {
 				g2.setColor(p.getColour());
+				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (p.getReflected()) reflectedStroke = true;
 				for (int i = 0; i < numberOfSectors; i++) {
-					//g2.fillOval(getWidth()/2 - p.x, getHeight()/2 - p.y, p.getBrushSize(), p.getBrushSize());
-					if (lastPoint != null) {
-						g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+					if (lastPoint != null && reflectedStroke == false) {
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
 					}
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-					
+				}
+				if (lastPoint != null) {
+					previousLastPoint = lastPoint;
 				}
 				lastPoint = p;
 			}
