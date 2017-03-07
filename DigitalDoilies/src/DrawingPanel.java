@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -52,12 +53,14 @@ public class DrawingPanel extends JPanel {
 	private boolean reflect;
 	private int brushSize;
 	private Color brushColour;
+	private boolean showSectors;
 	
 	public DrawingPanel(int defaultNumberOfSectors) {
 		reflect = false;
 		numberOfSectors = 0;
 		brushSize = 5;
 		brushColour = Color.WHITE;
+		showSectors = true;
 		this.setBackground(Color.BLACK);
 		this.setPreferredSize(new Dimension(400,400));
 		this.setMinimumSize(new Dimension(200,200));
@@ -92,6 +95,12 @@ public class DrawingPanel extends JPanel {
 		
 		this.numberOfSectors = numberOfSectors;
 		
+		repaint();
+	}
+	
+public void toggleSectors() {
+		
+		showSectors = !showSectors;
 		repaint();
 	}
 	
@@ -152,12 +161,11 @@ public class DrawingPanel extends JPanel {
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(Color.WHITE);
 		
-		for (int i = 0; i < numberOfSectors; i++) {
-			
-			g2.setColor(Color.WHITE);
-			g.drawLine(this.getWidth()/2, this.getHeight()/2, this.getWidth()/2, this.getHeight()/6);
-			g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-			
+		if (showSectors) {
+			for (int i = 0; i < numberOfSectors; i++) {
+				g2.drawLine(this.getWidth()/2, this.getHeight()/2, this.getWidth()/2, this.getHeight()/6);
+				g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+			}
 		}
 		
 		while (!points.isEmpty()) {

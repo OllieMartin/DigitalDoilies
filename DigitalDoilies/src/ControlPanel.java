@@ -19,6 +19,7 @@ public class ControlPanel extends JPanel {
 	private JSlider brushSlider;
 	private JButton undoButton;
 	private JButton colourButton;
+	private JToggleButton sectorButton;
 	
 	public ControlPanel(DrawingPanel drawingPanel) {
 		
@@ -84,12 +85,24 @@ public class ControlPanel extends JPanel {
 			
 		});
 		
+		sectorButton = new JToggleButton("Show sectors");
+		sectorButton.setSelected(true);
+		sectorButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				drawingPanel.toggleSectors();	
+			}
+			
+		});
+		
 		this.add(reflectButton);
 		this.add(clearButton);
 		this.add(sectorSlider);
 		this.add(brushSlider);
 		this.add(undoButton);
 		this.add(colourButton);
+		this.add(sectorButton);
 	}
 	
 }
