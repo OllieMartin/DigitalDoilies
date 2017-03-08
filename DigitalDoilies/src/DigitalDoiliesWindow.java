@@ -13,7 +13,7 @@ public class DigitalDoiliesWindow extends JFrame {
 	
 	public DigitalDoiliesWindow() {
 		super("Digital Doilies");
-		mainPane = new DigitalDoiliesPanel(250);
+		mainPane = new DigitalDoiliesPanel(200);
 		this.add(mainPane);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setSize(500, 500);
