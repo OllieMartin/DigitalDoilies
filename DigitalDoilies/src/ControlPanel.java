@@ -1,6 +1,7 @@
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -128,7 +129,7 @@ public class ControlPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				galleryPanel.addImage(drawingPanel.getImage());	
+				galleryPanel.addImage((BufferedImage) drawingPanel.getImage());	
 			}
 
 		});

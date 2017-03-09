@@ -41,24 +41,27 @@ public class GalleryPanel extends JPanel {
 		return this.width - 10;
 	}
 
-	public void addImage(Image image) {
+	public void addImage(BufferedImage image) {
 		if (images.size() < 12) {
 		JToggleButton newSave = new JToggleButton();
 		Border line = new LineBorder(Color.BLACK);
 		Border margin = new EmptyBorder(1, 0, 1, 0);
 		Border compound = new CompoundBorder(line, margin);
 		newSave.setBorder(compound);
-		Image newImage = new BufferedImage(width,width,BufferedImage.TYPE_INT_RGB);
-		image = image.getScaledInstance(width,width,BufferedImage.TYPE_INT_RGB);
-		newSave.setIcon(new ImageIcon(image));
+		float iwidth = image.getWidth();
+		float iheight = image.getHeight();
+		BufferedImage newImage = new BufferedImage(width,(int) (width*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
+		System.out.println(width*(iheight/iwidth));
+		newSave.setIcon(new ImageIcon(image.getScaledInstance(width,(int) (width*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB)));
 		newSave.setHorizontalAlignment(SwingConstants.CENTER);
 		newSave.setVerticalAlignment(SwingConstants.CENTER);
 		Graphics2D g2 = (Graphics2D) newImage.getGraphics();
-		g2.drawImage(image,0,0,newSave);
+		g2.drawImage(image.getScaledInstance(width,(int) (width*(iheight/iwidth)),Image.SCALE_DEFAULT),0,0,newSave);
 		g2.setColor(Color.RED);
 		g2.setStroke(new BasicStroke(5,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g2.drawLine(0, 0, width, width);
+		g2.drawLine(0, 0, width, (int) (width*(iheight/iwidth)));
 		newSave.setSelectedIcon(new ImageIcon(newImage));
+		newSave.setMinimumSize(new Dimension(width,width));
 		this.add(newSave);
 		images.add(newSave);
 		//buttons.add(newSave);
