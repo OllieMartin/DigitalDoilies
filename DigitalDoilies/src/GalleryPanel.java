@@ -1,19 +1,12 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -26,55 +19,60 @@ import javax.swing.border.LineBorder;
 @SuppressWarnings("serial")
 public class GalleryPanel extends JPanel {
 
-	private int width;
-	private int adjustedWidth;
-	private List<JToggleButton> images;
-	//private ButtonGroup buttons;
+	private int displayedImageWidth;  // The width for images added to the gallery taking into account the scroll-bar
+	private List<JToggleButton> galleryImages; // The list of images added to the gallery
 
-	public GalleryPanel(int width) {
-		this.width = width;
-		adjustedWidth = width - 20;
-		this.images = new ArrayList<JToggleButton>();
+	private static final int APPROX_SROLL_BAR_WIDTH = 20; // Approximate width of the vertical scroll bar used to properly place the gallery images
+	private static final int MAXIMUM_GALLERY_IMAGES = 12; // The maximum number of images allowed in the gallery
+	private static final int GALLERY_VERTICAL_PADDING = 1; // The number of pixels above and below each image in the gallery
+	private static final int GALLERY_HORIZONTAL_PADDING = 0; // The number of pixels left and right of each image in the gallery
+
+	/**
+	 * Create a new gallery panel with the specified width
+	 * 
+	 * @param panelWidth
+	 */
+	public GalleryPanel(int panelWidth) {
+
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		//this.buttons = new ButtonGroup();
-	}
 
-	public int getWidth() {
-		return this.width;
+		this.galleryImages = new ArrayList<JToggleButton>();
+		this.displayedImageWidth = panelWidth - APPROX_SROLL_BAR_WIDTH;
+
 	}
 
 	public void addImage(BufferedImage image) {
-		if (images.size() < 12) {
-			
+		if (galleryImages.size() < MAXIMUM_GALLERY_IMAGES) {
+
 			Image scaledImage;
-			
+
 			JToggleButton newSave = new JToggleButton();
 			Border line = new LineBorder(Color.BLACK);
-			Border margin = new EmptyBorder(1, 0, 1, 0);
+			Border margin = new EmptyBorder(GALLERY_VERTICAL_PADDING, GALLERY_HORIZONTAL_PADDING, GALLERY_VERTICAL_PADDING, GALLERY_HORIZONTAL_PADDING);
 			Border compound = new CompoundBorder(line, margin);
 			newSave.setBorder(compound);
-			
+
 			float iwidth = image.getWidth();
 			float iheight = image.getHeight();
-			
-			scaledImage = image.getScaledInstance(adjustedWidth,(int) (adjustedWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
-			
+
+			scaledImage = image.getScaledInstance(displayedImageWidth,(int) (displayedImageWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
+
 			newSave.setIcon(new ImageIcon(scaledImage));
 			newSave.setHorizontalAlignment(SwingConstants.CENTER);
 			newSave.setVerticalAlignment(SwingConstants.CENTER);
-			
-			BufferedImage selectedImage = new BufferedImage(adjustedWidth,(int) (adjustedWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
+
+			BufferedImage selectedImage = new BufferedImage(displayedImageWidth,(int) (displayedImageWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2 = (Graphics2D) selectedImage.getGraphics();
 			g2.drawImage(scaledImage,0,0, this);
 			g2.setColor(Color.RED);
 			g2.setStroke(new BasicStroke(5,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g2.drawLine(0, 0, adjustedWidth, (int) (adjustedWidth*(iheight/iwidth)));
-			g2.drawLine(adjustedWidth, 0, 0, (int) (adjustedWidth*(iheight/iwidth)));
-			
+			g2.drawLine(0, 0, displayedImageWidth, (int) (displayedImageWidth*(iheight/iwidth)));
+			g2.drawLine(displayedImageWidth, 0, 0, (int) (displayedImageWidth*(iheight/iwidth)));
+
 			newSave.setSelectedIcon(new ImageIcon(selectedImage));
-			
+
 			this.add(newSave);
-			images.add(newSave);
+			galleryImages.add(newSave);
 
 			this.updateUI();
 		}
@@ -82,13 +80,13 @@ public class GalleryPanel extends JPanel {
 
 	public void deleteSelected() {
 		List<JToggleButton> toRemove = new ArrayList<JToggleButton>();
-		for (JToggleButton image : images) {
+		for (JToggleButton image : galleryImages) {
 			if (image.isSelected()) {
 				this.remove(image);
 				toRemove.add(image);
 			}
 		}
-		images.removeAll(toRemove);
+		galleryImages.removeAll(toRemove);
 		this.updateUI();
 	}
 

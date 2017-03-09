@@ -20,6 +20,7 @@ public class DigitalDoiliesPanel extends JPanel {
 	private ControlPanel controlPanel; // The panel containing the control elements for the application
 	private GalleryPanel galleryPanel; // The panel containing the gallery for saved images
 
+	// TODO refactor scroll panel into gallery panel with new remove button
 	private JScrollPane galleryScroll; // A scroll panel to contain the gallery panel
 
 	private static final int DEFAULT_SECTORS = 12; // The default number of sectors for the drawing panel

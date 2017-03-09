@@ -16,15 +16,34 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class DrawingPanel extends JPanel {
+
+	////////////////////////////////////////
 	
-	//
-	
+	/**
+	 * Extends Point to represent a point drawn by the user
+	 * 
+	 * Contains information about the colour, brush size, and if this point is as a result of reflection
+	 * 
+	 * @see Point
+	 * 
+	 * @author ojm1g16
+	 *
+	 */
 	private class DrawnPoint extends Point {
 		
-		private int brushSize;
-		private Color colour;
-		private boolean reflected;
+		private int brushSize; // Stores the brush size of the point
+		private Color colour; // Stores the colour of the point
+		private boolean reflected; // Stores if the point was drawn as a result of being reflected
 		
+		/**
+		 * Creates a new point drawn by the user with specified parameters
+		 * 
+		 * @param x The x coordinate of the point
+		 * @param y The y coordinate of the point
+		 * @param brushSize The current size of the brush in the application
+		 * @param colour The colour of the point
+		 * @param reflected If the point is being drawn as a result of being reflected from another point
+		 */
 		public DrawnPoint(int x, int y, int brushSize, Color colour, boolean reflected) {
 			super(x,y);
 			this.colour = colour;
@@ -32,41 +51,68 @@ public class DrawingPanel extends JPanel {
 			this.reflected = reflected;
 		}
 		
+		/**
+		 * Get the brush size of the point
+		 * 
+		 * @return The brush size of the point
+		 */
 		public int getBrushSize() {
 			return this.brushSize;
 		}
 		
+		/**
+		 * Get the colour of the point
+		 * 
+		 * @return The colour of the point
+		 */
 		public Color getColour() {
 			return this.colour;
 		}
 		
+		/**
+		 * Returns a boolean value indicating if this point was drawn as a result of another point being reflected
+		 * 
+		 * @return true if this was a reflected point, else false
+		 */
 		public boolean getReflected() {
 			return reflected;
 		}
 		
 	}
 	
-	//
+	////////////////////////////////////////
 	
-	private int numberOfSectors;
-	private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>();
-	private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>();
-	private Point mousePosition;
-	private boolean reflect;
-	private int brushSize;
-	private Color brushColour;
-	private boolean showSectors;
+	private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>(); // The image represented as a stack of drawn 'strokes' which are in turn stored as lists of DrawnPoints
+	private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>(); // The current stroke being drawn by the user represented as a list of DrawnPoints
+	private Point mousePosition; // The current position of the mouse on the drawing panel, null if the mouse is elsewhere
 	
+	private int numberOfSectors; // The current number of sectors being used to draw
+	private boolean showSectors; // True if the sector lines should be drawn, otherwise false
+	
+	private int brushSize; // The current size of the brush being used
+	private Color brushColour; // The current colour of the brush being used
+	
+	private boolean reflect; // If new drawn points should be reflected within their respective sectors
+	
+	private static final int DEFAULT_BRUSH_SIZE = 5; // The default size of the brush
+	private static final int MINIMUM_PANEL_SIZE = 200; // The minimum width/height for the drawing panel object
+	private static final Color DEFAULT_BACKGROUND_COLOUR = Color.BLACK; // The background colour to be used for the drawing panel
+	private static final Color DEFAULT_BRUSH_COLOUR = Color.WHITE; // The default colour to be selected for the brush
+	
+	/**
+	 * Creates a new drawing panel with a specified number of sectors to begin with
+	 * 
+	 * @param defaultNumberOfSectors The number of sectors to be displayed by default
+	 */
 	public DrawingPanel(int defaultNumberOfSectors) {
+		
 		reflect = false;
 		mousePosition = null;
-		numberOfSectors = 0;
-		brushSize = 5;
-		brushColour = Color.WHITE;
+		brushSize = DEFAULT_BRUSH_SIZE;
+		brushColour = DEFAULT_BRUSH_COLOUR;
 		showSectors = true;
-		this.setBackground(Color.BLACK);
-		this.setPreferredSize(new Dimension(400,400));
-		this.setMinimumSize(new Dimension(200,200));
+		this.setBackground(DEFAULT_BACKGROUND_COLOUR);
+		this.setMinimumSize(new Dimension(MINIMUM_PANEL_SIZE, MINIMUM_PANEL_SIZE));
 		this.addMouseMotionListener(new MouseAdapter() {
 			
 			@Override
