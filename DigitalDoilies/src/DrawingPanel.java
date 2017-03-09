@@ -51,6 +51,7 @@ public class DrawingPanel extends JPanel {
 	private int numberOfSectors;
 	private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>();
 	private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>();
+	private Point mousePosition;
 	private boolean reflect;
 	private int brushSize;
 	private Color brushColour;
@@ -58,6 +59,7 @@ public class DrawingPanel extends JPanel {
 	
 	public DrawingPanel(int defaultNumberOfSectors) {
 		reflect = false;
+		mousePosition = null;
 		numberOfSectors = 0;
 		brushSize = 5;
 		brushColour = Color.WHITE;
@@ -74,6 +76,7 @@ public class DrawingPanel extends JPanel {
 				if (reflect) {
 					currentStroke.add(new DrawnPoint(e.getX() - getWidth()/2, getHeight()/2 - e.getY(), brushSize, brushColour, true));
 				}
+				mousePosition = null;
 				repaint();
 			}
 			
@@ -85,6 +88,24 @@ public class DrawingPanel extends JPanel {
 				super.mouseReleased(e);
 				points.push(new ArrayList<DrawnPoint>(currentStroke));
 				currentStroke.clear();
+				repaint();
+			}
+			
+		});
+		this.addMouseMotionListener(new MouseAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				super.mouseMoved(e);
+				mousePosition = e.getPoint();
+				repaint();
+			}
+			
+		});
+		this.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseExited(MouseEvent e) {
+				super.mouseExited(e);
+				mousePosition = null;
 				repaint();
 			}
 			
@@ -196,6 +217,12 @@ public void toggleSectors() {
 					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
 					}
+					/*if (mousePosition != null) {
+						
+						g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),150));
+						g2.fillOval(mousePosition.x - getBrushSize()/2,mousePosition.y -getBrushSize()/2,getBrushSize(),getBrushSize());
+					
+					}*/
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
 				}
 				if (lastPoint != null) {
@@ -225,6 +252,13 @@ public void toggleSectors() {
 					previousLastPoint = lastPoint;
 				}
 				lastPoint = p;
+			}
+			
+			if (mousePosition != null) {
+				
+				g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),150));
+				g2.fillOval(mousePosition.x - getBrushSize()/2,mousePosition.y -getBrushSize()/2,getBrushSize(),getBrushSize());
+			
 			}
 		
 	}

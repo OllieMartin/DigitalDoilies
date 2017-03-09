@@ -23,6 +23,7 @@ public class DigitalDoiliesPanel extends JPanel {
 	private JScrollPane galleryScroll; // A scroll panel to contain the gallery panel
 
 	private static final int DEFAULT_SECTORS = 12; // The default number of sectors for the drawing panel
+	private static final int SCROLL_FACTOR = 10; // The number of lines scrolled on the gallery scroll bar
 
 	/**
 	 * Create a new panel with a specified width for the gallery images to be displayed
@@ -42,6 +43,7 @@ public class DigitalDoiliesPanel extends JPanel {
 		galleryScroll.setPreferredSize(new Dimension(galleryWidth,galleryWidth));
 		galleryScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		galleryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
+		galleryScroll.getVerticalScrollBar().setUnitIncrement(SCROLL_FACTOR);
 
 		this.add(controlPanel, BorderLayout.WEST);
 		this.add(drawingPanel, BorderLayout.CENTER);
