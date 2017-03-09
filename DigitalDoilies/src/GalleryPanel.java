@@ -17,6 +17,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -48,7 +49,10 @@ public class GalleryPanel extends JPanel {
 		Border compound = new CompoundBorder(line, margin);
 		newSave.setBorder(compound);
 		Image newImage = new BufferedImage(width,width,BufferedImage.TYPE_INT_RGB);
+		image = image.getScaledInstance(width,width,BufferedImage.TYPE_INT_RGB);
 		newSave.setIcon(new ImageIcon(image));
+		newSave.setHorizontalAlignment(SwingConstants.CENTER);
+		newSave.setVerticalAlignment(SwingConstants.CENTER);
 		Graphics2D g2 = (Graphics2D) newImage.getGraphics();
 		g2.drawImage(image,0,0,newSave);
 		g2.setColor(Color.RED);

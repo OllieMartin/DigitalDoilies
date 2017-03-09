@@ -149,10 +149,10 @@ public void toggleSectors() {
 		}
 	}
 	
-	public Image getBufferedImage(int width) {
-		BufferedImage image = new BufferedImage(getWidth(),getWidth(),BufferedImage.TYPE_INT_RGB);
+	public Image getImage() {
+		BufferedImage image = new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_RGB);
 		paintComponent(image.getGraphics());
-		return image.getScaledInstance(width, width, Image.SCALE_DEFAULT);
+		return image;
 	}
 	
 	@Override

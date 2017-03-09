@@ -128,7 +128,7 @@ public class ControlPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				galleryPanel.addImage(drawingPanel.getBufferedImage(galleryPanel.getWidth()));	
+				galleryPanel.addImage(drawingPanel.getImage());	
 			}
 
 		});
