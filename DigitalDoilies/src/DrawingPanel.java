@@ -5,12 +5,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,11 +82,9 @@ public class DrawingPanel extends JPanel {
 	
 	////////////////////////////////////////
 	
-	//private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>(); // The image represented as a stack of drawn 'strokes' which are in turn stored as lists of DrawnPoints
-	//private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>(); // The current stroke being drawn by the user represented as a list of DrawnPoints
+	private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>(); // The image represented as a stack of drawn 'strokes' which are in turn stored as lists of DrawnPoints
+	private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>(); // The current stroke being drawn by the user represented as a list of DrawnPoints
 	private Point mousePosition; // The current position of the mouse on the drawing panel, null if the mouse is elsewhere
-	private Stroke currentStroke;
-	private Stack<Stroke> strokes;
 	
 	private int numberOfSectors; // The current number of sectors being used to draw
 	private boolean showSectors; // True if the sector lines should be drawn, otherwise false
@@ -112,7 +106,6 @@ public class DrawingPanel extends JPanel {
 	 */
 	public DrawingPanel(int defaultNumberOfSectors) {
 		
-		strokes = new Stack<Stroke>();
 		reflect = false;
 		mousePosition = null;
 		brushSize = DEFAULT_BRUSH_SIZE;
@@ -125,26 +118,23 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				super.mouseDragged(e);
-				mousePosition = null;
-				if (currentStroke == null) {
-					currentStroke = new Stroke(brushColour, brushSize, reflect);
-					currentStroke.path.moveTo(e.getX(), e.getY());
-				} else {
-					currentStroke.path.lineTo(e.getX(), e.getY());
+				currentStroke.add(new DrawnPoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), brushSize, brushColour, false));
+				if (reflect) {
+					currentStroke.add(new DrawnPoint(e.getX() - getWidth()/2, getHeight()/2 - e.getY(), brushSize, brushColour, true));
 				}
+				mousePosition = null;
 				repaint();
 			}
+			
 		});
 		this.addMouseListener(new MouseAdapter() {
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
-				if (currentStroke != null && strokes != null) {
-				strokes.push(currentStroke);
-				currentStroke = null;
+				points.push(new ArrayList<DrawnPoint>(currentStroke));
+				currentStroke.clear();
 				repaint();
-				}
 			}
 			
 		});
@@ -206,10 +196,10 @@ public void toggleSectors() {
 	}
 	
 	public void clearPoints() {
-		while (!strokes.isEmpty()) {
-			strokes.pop();
+		while (!points.isEmpty()) {
+			points.pop();
 		}
-		currentStroke = null;
+		currentStroke.clear();
 		repaint();
 	}
 	
@@ -218,9 +208,9 @@ public void toggleSectors() {
 	}
 	
 	public void undo() {
-		if (!strokes.isEmpty() ) {
+		if (!points.isEmpty() ) {
 			
-			strokes.pop();
+			points.pop();
 			repaint();
 			
 		}
@@ -235,19 +225,15 @@ public void toggleSectors() {
 	@Override
 	protected void paintComponent(Graphics g) {
 		
-		//Stack<List<DrawnPoint>> popped = new Stack<List<DrawnPoint>>();
-		//List<DrawnPoint> stroke = new ArrayList<DrawnPoint>();
-		Stroke stroke;
-		Stack<Stroke> popped = new Stack<Stroke>();
+		Stack<List<DrawnPoint>> popped = new Stack<List<DrawnPoint>>();
+		List<DrawnPoint> stroke = new ArrayList<DrawnPoint>();
 		Point lastPoint;
 		Point previousLastPoint;
 		boolean reflectedStroke;
-		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 		
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(Color.WHITE);
-		g2.setRenderingHints(rh);
 		
 		if (showSectors) {
 			for (int i = 0; i < numberOfSectors; i++) {
@@ -256,78 +242,64 @@ public void toggleSectors() {
 			}
 		}
 		
-
-
-		while (!strokes.isEmpty()) {
-			stroke = strokes.pop();
+		while (!points.isEmpty()) {
+			stroke = points.pop();
 			popped.push(stroke);
 		}
+		
 		
 		while (!popped.isEmpty()) {
 			stroke = popped.pop();
 			lastPoint = null;
 			previousLastPoint = null;
-			g2.setColor(stroke.getColour());
-			g2.setStroke(new BasicStroke(stroke.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			for (int i = 0; i < numberOfSectors; i++) {
-			g2.draw(stroke.path);
-			if (stroke.getReflected()) {
-				g2.scale(-1, 1);
-				g2.draw(stroke.path);
-				g2.scale(-1, 1);
+			reflectedStroke = false;
+			for (DrawnPoint p : stroke) {
+				g2.setColor(p.getColour());
+				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (p.getReflected()) reflectedStroke = true;
+				for (int i = 0; i < numberOfSectors; i++) {
+					if (lastPoint != null && reflectedStroke == false) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
+					}
+					/*if (mousePosition != null) {
+						
+						g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),150));
+						g2.fillOval(mousePosition.x - getBrushSize()/2,mousePosition.y -getBrushSize()/2,getBrushSize(),getBrushSize());
+					
+					}*/
+					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+				if (lastPoint != null) {
+					previousLastPoint = lastPoint;
+				}
+				lastPoint = p;
+			}
+			points.push(stroke);
+		}	
+			
+			lastPoint = null;
+			previousLastPoint = null;
+			reflectedStroke = false;
+			for (DrawnPoint p : currentStroke) {
+				g2.setColor(p.getColour());
+				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (p.getReflected()) reflectedStroke = true;
+				for (int i = 0; i < numberOfSectors; i++) {
+					if (lastPoint != null && reflectedStroke == false) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
+					}
+					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+				if (lastPoint != null) {
+					previousLastPoint = lastPoint;
+				}
+				lastPoint = p;
 			}
 			
-			g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-			}
-			/*for (DrawnPoint p : stroke.path.getPathIterator(null)) {
-				g2.setColor(p.getColour());
-				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-				if (p.getReflected()) reflectedStroke = true;
-				for (int i = 0; i < numberOfSectors; i++) {
-					if (lastPoint != null && reflectedStroke == false) {
-						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
-					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
-						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
-					}
-					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-				}
-				if (lastPoint != null) {
-					previousLastPoint = lastPoint;
-				}
-				lastPoint = p;
-			}*/
-			strokes.push(stroke);
-		}	
-		if (currentStroke != null) {
-			g2.setColor(currentStroke.getColour());
-			g2.setStroke(new BasicStroke(currentStroke.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			for (int i = 0; i < numberOfSectors; i++) {
-			g2.draw(currentStroke.path);
-			if (currentStroke.getReflected()) {
-				g2.scale(-1, 1);
-				g2.draw(currentStroke.path);
-				g2.scale(-1, 1);
-			}
-			g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-			}
-			/*for (DrawnPoint p : currentStroke) {
-				g2.setColor(p.getColour());
-				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-				if (p.getReflected()) reflectedStroke = true;
-				for (int i = 0; i < numberOfSectors; i++) {
-					if (lastPoint != null && reflectedStroke == false) {
-						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
-					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
-						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
-					}
-					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-				}
-				if (lastPoint != null) {
-					previousLastPoint = lastPoint;
-				}
-				lastPoint = p;
-			}*/
-		}
 			if (mousePosition != null) {
 				
 				g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),150));
