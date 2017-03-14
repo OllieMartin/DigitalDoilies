@@ -49,14 +49,14 @@ public class DrawingPanel extends JPanel {
 		brushColour = DEFAULT_BRUSH_COLOUR;
 		showSectors = true;
 		strokes = new Stack<Stroke>();
-		createDrawing();
+		refreshDrawing();
 		this.setBackground(DEFAULT_BACKGROUND_COLOUR);
 		this.setMinimumSize(new Dimension(MINIMUM_PANEL_SIZE, MINIMUM_PANEL_SIZE));
 		
 		this.addComponentListener(new ComponentAdapter() {
 			
 			public void componentResized(ComponentEvent e) {
-				createDrawing();
+				refreshDrawing();
 				repaint();
 	        }
 			
@@ -76,10 +76,10 @@ public class DrawingPanel extends JPanel {
 				}
 
 				mousePosition = null;
-				repaint();
+				updateDrawing();
 			}
-
 		});
+		
 		this.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -87,7 +87,7 @@ public class DrawingPanel extends JPanel {
 				super.mouseReleased(e);
 				if (currentStroke != null) strokes.push(currentStroke);
 				currentStroke = null;
-				repaint();
+				refreshDrawing();
 			}
 			
 			@Override
@@ -99,7 +99,7 @@ public class DrawingPanel extends JPanel {
 				} else {
 					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
 				}
-				repaint();
+				updateDrawing();
 			}
 
 		});
@@ -125,83 +125,50 @@ public class DrawingPanel extends JPanel {
 		changeSectors(defaultNumberOfSectors);
 	}
 	
-	private void createDrawing() {
-		drawing = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_RGB);
+	private void updateDrawing() {
+	
+		Graphics2D g2 = (Graphics2D) drawing.getGraphics();
+		g2.setColor(Color.WHITE);
 		
-		
-		
-	}
-
-	public void changeSectors(int numberOfSectors) {
-
-		this.numberOfSectors = numberOfSectors;
-
-		repaint();
-	}
-
-	public void toggleSectors() {
-
-		showSectors = !showSectors;
-		repaint();
-	}
-
-	public int getBrushSize() {
-		return brushSize;
-	}
-
-	public void setBrushSize(int brushSize) {
-		this.brushSize = brushSize;
-		repaint();
-	}
-
-	public Color getBrushColour() {
-		return brushColour;
-	}
-
-	public void setBrushColour(Color colour) {
-		this.brushColour = colour;
-		repaint();
-	}
-
-	public void toggleReflection() {
-		reflect = !reflect;
-		repaint();
-	}
-
-	public void clearPoints() {
-		while (!strokes.isEmpty()) {
-			strokes.pop();
-		}
-		currentStroke = null;
-		repaint();
-	}
-
-	public int getSectors() {
-		return numberOfSectors;
-	}
-
-	public void undo() {
-		if (!strokes.isEmpty() ) {
-
-			strokes.pop();
-			repaint();
-
-		}
-	}
-
-	public Image getImage() {
-		BufferedImage image = new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_RGB);
-		paintComponent(image.getGraphics());
-		return image;
-	}
-
-	@Override
-	protected void paintComponent(Graphics g) {
-
 		StrokePoint lastPoint;
 
-		super.paintComponent(g);
-		Graphics2D g2 = (Graphics2D) g;
+		lastPoint = null;
+		if (currentStroke != null) {
+			for (StrokePoint p : currentStroke.points) {
+				g2.setColor(currentStroke.getColour());
+				g2.setStroke(new BasicStroke(currentStroke.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+				for (int i = 0; i < numberOfSectors; i++) {
+
+					if (currentStroke.points.size() == 1) {
+						g2.fillOval(getWidth()/2 - currentStroke.points.get(0).x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
+						if (currentStroke.getReflected()) {
+							g2.fillOval(getWidth()/2 - currentStroke.points.get(0).reflection.x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).reflection.y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
+						}
+					}
+					
+					if (lastPoint != null) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+						if (currentStroke.getReflected()) {
+							g2.drawLine(getWidth()/2 - p.reflection.x, getHeight()/2 - p.reflection.y, getWidth()/2 - lastPoint.reflection.x, getHeight()/2 - lastPoint.reflection.y);
+						}
+					}
+
+
+					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+				lastPoint = p;
+			}
+		}
+		repaint();
+	}
+	
+	private void refreshDrawing() {
+		drawing = new BufferedImage(Math.max(this.getWidth(), 1), Math.max(this.getHeight(),1),  BufferedImage.TYPE_INT_RGB);
+		
+		StrokePoint lastPoint;
+
+		Graphics2D g2 = (Graphics2D) drawing.getGraphics();
 		//g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setColor(Color.WHITE);
 
@@ -268,6 +235,76 @@ public class DrawingPanel extends JPanel {
 				lastPoint = p;
 			}
 		}
+		repaint();
+		
+	}
+
+	public void changeSectors(int numberOfSectors) {
+
+		this.numberOfSectors = numberOfSectors;
+		refreshDrawing();
+	}
+
+	public void toggleSectors() {
+
+		showSectors = !showSectors;
+		refreshDrawing();
+	}
+
+	public int getBrushSize() {
+		return brushSize;
+	}
+
+	public void setBrushSize(int brushSize) {
+		this.brushSize = brushSize;
+	}
+
+	public Color getBrushColour() {
+		return brushColour;
+	}
+
+	public void setBrushColour(Color colour) {
+		this.brushColour = colour;
+	}
+
+	public void toggleReflection() {
+		reflect = !reflect;
+	}
+
+	public void clearPoints() {
+		while (!strokes.isEmpty()) {
+			strokes.pop();
+		}
+		currentStroke = null;
+		refreshDrawing();
+	}
+
+	public int getSectors() {
+		return numberOfSectors;
+	}
+
+	public void undo() {
+		if (!strokes.isEmpty() ) {
+
+			strokes.pop();
+			refreshDrawing();
+
+		}
+	}
+
+	public Image getImage() {
+		BufferedImage image = new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_RGB);
+		paintComponent(image.getGraphics());
+		return image;
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+
+		super.paintComponent(g);
+		Graphics2D g2 = (Graphics2D) g;
+		
+		g2.drawImage(drawing, 0, 0, this);
 
 		if (mousePosition != null) {
 

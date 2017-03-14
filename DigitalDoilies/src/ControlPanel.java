@@ -79,8 +79,8 @@ public class ControlPanel extends JPanel {
 
 		});
 
-		brushSlider = new JSlider(2,Math.max(20,drawingPanel.getBrushSize()),drawingPanel.getBrushSize());
-		brushSizeLabel = new JLabel("Brush Size (" + brushSlider.getValue() + ")");
+		brushSlider = new JSlider(2,Math.max(30,drawingPanel.getBrushSize()),drawingPanel.getBrushSize());
+		brushSizeLabel = new JLabel("Brush size (" + brushSlider.getValue() + ")");
 		brushSizeLabel.setHorizontalAlignment(JLabel.CENTER);
 		brushSizeLabel.setVerticalAlignment(JLabel.CENTER);
 		brushSlider.addChangeListener(new ChangeListener() {
