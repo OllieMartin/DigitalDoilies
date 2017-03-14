@@ -5,6 +5,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -15,6 +18,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class DrawingPanel extends JPanel {
 
+	private BufferedImage drawing;
 	private Point mousePosition; // The current position of the mouse on the drawing panel, null if the mouse is elsewhere
 	private Stack<Stroke> strokes;
 	private Stroke currentStroke;
@@ -45,8 +49,19 @@ public class DrawingPanel extends JPanel {
 		brushColour = DEFAULT_BRUSH_COLOUR;
 		showSectors = true;
 		strokes = new Stack<Stroke>();
+		createDrawing();
 		this.setBackground(DEFAULT_BACKGROUND_COLOUR);
 		this.setMinimumSize(new Dimension(MINIMUM_PANEL_SIZE, MINIMUM_PANEL_SIZE));
+		
+		this.addComponentListener(new ComponentAdapter() {
+			
+			public void componentResized(ComponentEvent e) {
+				createDrawing();
+				repaint();
+	        }
+			
+		});
+		
 		this.addMouseMotionListener(new MouseAdapter() {
 
 			@Override
@@ -108,6 +123,13 @@ public class DrawingPanel extends JPanel {
 
 		});
 		changeSectors(defaultNumberOfSectors);
+	}
+	
+	private void createDrawing() {
+		drawing = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_RGB);
+		
+		
+		
 	}
 
 	public void changeSectors(int numberOfSectors) {
@@ -180,6 +202,7 @@ public class DrawingPanel extends JPanel {
 
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
+		//g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setColor(Color.WHITE);
 
 		if (showSectors) {
@@ -211,7 +234,6 @@ public class DrawingPanel extends JPanel {
 							g2.drawLine(getWidth()/2 - p.reflection.x, getHeight()/2 - p.reflection.y, getWidth()/2 - lastPoint.reflection.x, getHeight()/2 - lastPoint.reflection.y);
 						}
 					}
-
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
 				}
 				lastPoint = p;
