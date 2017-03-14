@@ -74,6 +74,18 @@ public class DrawingPanel extends JPanel {
 				currentStroke = null;
 				repaint();
 			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				super.mousePressed(e);
+				if (currentStroke == null) currentStroke = new Stroke(brushSize, brushColour, reflect);
+				if (currentStroke.getReflected()) {
+					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), e.getX() - getWidth()/2, getHeight()/2 - e.getY()));
+				} else {
+					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
+				}
+				repaint();
+			}
 
 		});
 		this.addMouseMotionListener(new MouseAdapter() {
@@ -82,6 +94,7 @@ public class DrawingPanel extends JPanel {
 				super.mouseMoved(e);
 				mousePosition = e.getPoint();
 				repaint();
+				//repaint(e.getX() -brushSize*2,e.getY()-brushSize*2,brushSize * 3,brushSize*3);
 			}
 
 		});
@@ -185,6 +198,13 @@ public class DrawingPanel extends JPanel {
 
 				for (int i = 0; i < numberOfSectors; i++) {
 
+					if (s.points.size() == 1) {
+						g2.fillOval(getWidth()/2 - s.points.get(0).x - s.getBrushSize()/2, getHeight()/2 - s.points.get(0).y - s.getBrushSize()/2, s.getBrushSize(), s.getBrushSize());
+						if (s.getReflected()) {
+							g2.fillOval(getWidth()/2 - s.points.get(0).reflection.x - s.getBrushSize()/2, getHeight()/2 - s.points.get(0).reflection.y - s.getBrushSize()/2, s.getBrushSize(), s.getBrushSize());
+						}
+					}
+					
 					if (lastPoint != null) {
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
 						if (s.getReflected()) {
@@ -206,6 +226,13 @@ public class DrawingPanel extends JPanel {
 
 				for (int i = 0; i < numberOfSectors; i++) {
 
+					if (currentStroke.points.size() == 1) {
+						g2.fillOval(getWidth()/2 - currentStroke.points.get(0).x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
+						if (currentStroke.getReflected()) {
+							g2.fillOval(getWidth()/2 - currentStroke.points.get(0).reflection.x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).reflection.y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
+						}
+					}
+					
 					if (lastPoint != null) {
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
 						if (currentStroke.getReflected()) {
