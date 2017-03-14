@@ -82,9 +82,11 @@ public class DrawingPanel extends JPanel {
 	
 	////////////////////////////////////////
 	
-	private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>(); // The image represented as a stack of drawn 'strokes' which are in turn stored as lists of DrawnPoints
-	private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>(); // The current stroke being drawn by the user represented as a list of DrawnPoints
+	//private Stack<List<DrawnPoint>> points = new Stack<List<DrawnPoint>>(); // The image represented as a stack of drawn 'strokes' which are in turn stored as lists of DrawnPoints
+	//private List<DrawnPoint> currentStroke = new ArrayList<DrawnPoint>(); // The current stroke being drawn by the user represented as a list of DrawnPoints
 	private Point mousePosition; // The current position of the mouse on the drawing panel, null if the mouse is elsewhere
+	private Stack<Stroke> strokes;
+	private Stroke currentStroke;
 	
 	private int numberOfSectors; // The current number of sectors being used to draw
 	private boolean showSectors; // True if the sector lines should be drawn, otherwise false
@@ -118,9 +120,10 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				super.mouseDragged(e);
-				currentStroke.add(new DrawnPoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), brushSize, brushColour, false));
-				if (reflect) {
-					currentStroke.add(new DrawnPoint(e.getX() - getWidth()/2, getHeight()/2 - e.getY(), brushSize, brushColour, true));
+				if (currentStroke == null) currentStroke = new Stroke(brushSize, brushColour, reflect);
+				currentStroke.points.add(new Point(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
+				if (currentStroke.getReflected()) {
+					currentStroke.reflectedPoints.add(new Point(e.getX() - getWidth()/2, getHeight()/2 - e.getY()));
 				}
 				mousePosition = null;
 				repaint();
@@ -132,8 +135,8 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
-				points.push(new ArrayList<DrawnPoint>(currentStroke));
-				currentStroke.clear();
+				strokes.push(currentStroke);
+				currentStroke = null;
 				repaint();
 			}
 			
@@ -196,10 +199,10 @@ public void toggleSectors() {
 	}
 	
 	public void clearPoints() {
-		while (!points.isEmpty()) {
-			points.pop();
+		while (!strokes.isEmpty()) {
+			strokes.pop();
 		}
-		currentStroke.clear();
+		currentStroke = null;
 		repaint();
 	}
 	
@@ -208,9 +211,9 @@ public void toggleSectors() {
 	}
 	
 	public void undo() {
-		if (!points.isEmpty() ) {
+		if (!strokes.isEmpty() ) {
 			
-			points.pop();
+			strokes.pop();
 			repaint();
 			
 		}
@@ -242,9 +245,35 @@ public void toggleSectors() {
 			}
 		}
 		
-		while (!points.isEmpty()) {
-			stroke = points.pop();
-			popped.push(stroke);
+		for (Stroke s : strokes) {
+			stroke = popped.pop();
+			lastPoint = null;
+			previousLastPoint = null;
+			reflectedStroke = false;
+			for (Point p : s.points) {
+				g2.setColor(p.getColour());
+				g2.setStroke(new BasicStroke(p.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (p.getReflected()) reflectedStroke = true;
+				for (int i = 0; i < numberOfSectors; i++) {
+					if (lastPoint != null && reflectedStroke == false) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
+					} else if (lastPoint != null && previousLastPoint != null && reflectedStroke) {
+						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - previousLastPoint.x, getHeight()/2 - previousLastPoint.y);
+					}
+					/*if (mousePosition != null) {
+						
+						g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),150));
+						g2.fillOval(mousePosition.x - getBrushSize()/2,mousePosition.y -getBrushSize()/2,getBrushSize(),getBrushSize());
+					
+					}*/
+					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+				}
+				if (lastPoint != null) {
+					previousLastPoint = lastPoint;
+				}
+				lastPoint = p;
+			}
+			points.push(stroke);
 		}
 		
 		
