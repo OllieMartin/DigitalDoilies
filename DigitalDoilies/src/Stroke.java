@@ -1,16 +1,14 @@
 import java.awt.Color;
-import java.awt.Point;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Stroke {
 
-	public Set<Point> points;
-	public Set<Point> reflectedPoints;
+	public List<StrokePoint> points;
 	private int brushSize; // Stores the brush size of the stroke
 	private Color colour; // Stores the colour of the stroke
 	private boolean reflected; // Stores if the stroke should be reflected
-	
+
 	/**
 	 * Creates a new stroke drawn by the user with specified parameters
 	 * 
@@ -22,10 +20,9 @@ public class Stroke {
 		this.colour = brushColour;
 		this.brushSize = brushSize;
 		this.reflected = reflected;
-		this.points = new HashSet<Point>();
-		if (reflected) this.reflectedPoints = new HashSet<Point>();
+		this.points = new ArrayList<StrokePoint>();
 	}
-	
+
 	/**
 	 * Get the brush size of the stroke
 	 * 
@@ -34,7 +31,7 @@ public class Stroke {
 	public int getBrushSize() {
 		return this.brushSize;
 	}
-	
+
 	/**
 	 * Get the colour of the stroke
 	 * 
@@ -43,7 +40,7 @@ public class Stroke {
 	public Color getColour() {
 		return this.colour;
 	}
-	
+
 	/**
 	 * Returns a boolean value indicating if this stroke is to be reflected
 	 * 
@@ -52,5 +49,5 @@ public class Stroke {
 	public boolean getReflected() {
 		return reflected;
 	}
-	
+
 }
