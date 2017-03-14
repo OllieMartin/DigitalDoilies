@@ -70,7 +70,7 @@ public class DrawingPanel extends JPanel {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
-				strokes.push(currentStroke);
+				if (currentStroke != null) strokes.push(currentStroke);
 				currentStroke = null;
 				repaint();
 			}
