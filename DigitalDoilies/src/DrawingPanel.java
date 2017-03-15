@@ -34,6 +34,7 @@ public class DrawingPanel extends JPanel {
 	private static final int MINIMUM_PANEL_SIZE = 200; // The minimum width/height for the drawing panel object
 	private static final Color DEFAULT_BACKGROUND_COLOUR = Color.BLACK; // The background colour to be used for the drawing panel
 	private static final Color DEFAULT_BRUSH_COLOUR = Color.WHITE; // The default colour to be selected for the brush
+	private static final int BRUSH_HOVER_TRANSPARENCY = 150; // The transparency factor for the brush hovering over the drawing panel
 
 	/**
 	 * Creates a new drawing panel with a specified number of sectors to begin with
@@ -204,36 +205,9 @@ public class DrawingPanel extends JPanel {
 				lastPoint = p;
 			}
 		}
-
-		/*lastPoint = null;
-		if (currentStroke != null) {
-			for (StrokePoint p : currentStroke.points) {
-				g2.setColor(currentStroke.getColour());
-				g2.setStroke(new BasicStroke(currentStroke.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-				for (int i = 0; i < numberOfSectors; i++) {
-
-					if (currentStroke.points.size() == 1) {
-						g2.fillOval(getWidth()/2 - currentStroke.points.get(0).x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
-						if (currentStroke.getReflected()) {
-							g2.fillOval(getWidth()/2 - currentStroke.points.get(0).reflection.x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).reflection.y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
-						}
-					}
-					
-					if (lastPoint != null) {
-						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
-						if (currentStroke.getReflected()) {
-							g2.drawLine(getWidth()/2 - p.reflection.x, getHeight()/2 - p.reflection.y, getWidth()/2 - lastPoint.reflection.x, getHeight()/2 - lastPoint.reflection.y);
-						}
-					}
-
-
-					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-				}
-				lastPoint = p;
-			}
-		}*/
+		
 		updateDrawing();
+		
 		repaint();
 		
 	}
@@ -303,11 +277,11 @@ public class DrawingPanel extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		
-		g2.drawImage(drawing, 0, 0, this);
+		g2.drawImage(drawing, 0, 0, null);
 
 		if (mousePosition != null) {
 
-			g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),150));
+			g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),BRUSH_HOVER_TRANSPARENCY));
 			g2.fillOval(mousePosition.x - getBrushSize()/2,mousePosition.y -getBrushSize()/2,getBrushSize(),getBrushSize());
 
 		}

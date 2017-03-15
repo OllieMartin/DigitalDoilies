@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -23,6 +24,8 @@ import javax.swing.event.ChangeListener;
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel {
 
+	private GridLayout layout;
+
 	private JToggleButton reflectButton; // Button to toggle reflection of drawings
 	private JButton clearButton; // Button to clear current drawing
 	private JSlider sectorSlider; // Button to adjust number of sectors used
@@ -31,9 +34,13 @@ public class ControlPanel extends JPanel {
 	private JButton colourButton; // Button to show JColorChooser to set brush colour
 	private JToggleButton sectorButton; // Button to toggle showing the sector lines
 	private JButton saveButton; // Button to save current image to the gallery
-//	private JButton deleteButton; // Button to delete selected images in the gallery
 	private JLabel sectorLabel; // Label to identify the sector slider
 	private JLabel brushSizeLabel; // Label to identify the brush size slider
+
+	private static final int SECTOR_MAX = 30;
+	private static final int SECTOR_MIN = 1;
+	private static final int BRUSH_MAX = 30;
+	private static final int BRUSH_MIN = 2;
 
 	/**
 	 * Create a new control panel to act on the specified drawing panel and gallery panel
@@ -43,7 +50,9 @@ public class ControlPanel extends JPanel {
 	 */
 	public ControlPanel(DrawingPanel drawingPanel, GalleryPanel galleryPanel) {
 
-		this.setLayout(new GridLayout(10,1));
+		layout = new GridLayout(10,1);
+
+		this.setLayout(layout);
 
 		reflectButton = new JToggleButton("Reflect");
 		reflectButton.addActionListener(new ActionListener() {
@@ -65,7 +74,7 @@ public class ControlPanel extends JPanel {
 
 		});
 
-		sectorSlider = new JSlider(1,Math.max(30,drawingPanel.getSectors()),drawingPanel.getSectors());
+		sectorSlider = new JSlider(SECTOR_MIN,Math.max(SECTOR_MAX,drawingPanel.getSectors()),drawingPanel.getSectors());
 		sectorLabel = new JLabel("Number of sectors (" + sectorSlider.getValue() + ")");
 		sectorLabel.setHorizontalAlignment(JLabel.CENTER);
 		sectorLabel.setVerticalAlignment(JLabel.CENTER);
@@ -81,7 +90,7 @@ public class ControlPanel extends JPanel {
 
 		});
 
-		brushSlider = new JSlider(2,Math.max(30,drawingPanel.getBrushSize()),drawingPanel.getBrushSize());
+		brushSlider = new JSlider(BRUSH_MIN,Math.max(BRUSH_MAX,drawingPanel.getBrushSize()),drawingPanel.getBrushSize());
 		brushSizeLabel = new JLabel("Brush size (" + brushSlider.getValue() + ")");
 		brushSizeLabel.setHorizontalAlignment(JLabel.CENTER);
 		brushSizeLabel.setVerticalAlignment(JLabel.CENTER);
@@ -136,15 +145,10 @@ public class ControlPanel extends JPanel {
 
 		});
 
-//		deleteButton = new JButton("Delete");
-//		deleteButton.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//				galleryPanel.deleteSelected();	
-//			}
-//
-//		});
+		sectorLabel.setVerticalAlignment(SwingConstants.BOTTOM);
+		brushSizeLabel.setVerticalAlignment(SwingConstants.BOTTOM);
+		sectorSlider.setAlignmentY(TOP_ALIGNMENT);
+		brushSlider.setAlignmentY(TOP_ALIGNMENT);
 
 		this.add(undoButton);
 		this.add(clearButton);
@@ -156,7 +160,6 @@ public class ControlPanel extends JPanel {
 		this.add(sectorButton);
 		this.add(colourButton);
 		this.add(saveButton);
-		//this.add(deleteButton);
 	}
 
 }

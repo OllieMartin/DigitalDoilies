@@ -36,7 +36,8 @@ public class GalleryPanel extends JPanel {
 	private static final int GALLERY_VERTICAL_PADDING = 1; // The number of pixels above and below each image in the gallery
 	private static final int GALLERY_HORIZONTAL_PADDING = 0; // The number of pixels left and right of each image in the gallery
 	private static final int SCROLL_FACTOR = 10; // The number of lines scrolled on the gallery scroll bar
-
+	private static final int IMAGE_SELECT_STROKE = 5; // The width of the cross displayed when an image is selected
+	
 	/**
 	 * Create a new gallery panel with the specified width
 	 * 
@@ -96,7 +97,7 @@ public class GalleryPanel extends JPanel {
 			Graphics2D g2 = (Graphics2D) selectedImage.getGraphics();
 			g2.drawImage(scaledImage,0,0, this);
 			g2.setColor(Color.RED);
-			g2.setStroke(new BasicStroke(5,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g2.setStroke(new BasicStroke(IMAGE_SELECT_STROKE ,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2.drawLine(0, 0, displayedImageWidth, (int) (displayedImageWidth*(iheight/iwidth)));
 			g2.drawLine(displayedImageWidth, 0, 0, (int) (displayedImageWidth*(iheight/iwidth)));
 

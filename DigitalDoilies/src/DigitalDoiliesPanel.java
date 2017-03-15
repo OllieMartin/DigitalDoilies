@@ -1,8 +1,6 @@
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 /**
  * The main panel which holds the components of the application:
@@ -20,8 +18,6 @@ public class DigitalDoiliesPanel extends JPanel {
 	private ControlPanel controlPanel; // The panel containing the control elements for the application
 	private GalleryPanel galleryPanel; // The panel containing the gallery for saved images
 
-	
-
 	private static final int DEFAULT_SECTORS = 12; // The default number of sectors for the drawing panel
 
 	/**
@@ -36,7 +32,7 @@ public class DigitalDoiliesPanel extends JPanel {
 		drawingPanel = new DrawingPanel(DEFAULT_SECTORS);
 		galleryPanel = new GalleryPanel(galleryWidth);
 		controlPanel = new ControlPanel(drawingPanel, galleryPanel);
-		
+
 		this.add(controlPanel, BorderLayout.WEST);
 		this.add(drawingPanel, BorderLayout.CENTER);
 		this.add(galleryPanel, BorderLayout.EAST);
