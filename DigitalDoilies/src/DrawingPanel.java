@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -87,7 +86,7 @@ public class DrawingPanel extends JPanel {
 				super.mouseReleased(e);
 				if (currentStroke != null) strokes.push(currentStroke);
 				currentStroke = null;
-				refreshDrawing();
+				updateDrawing();
 			}
 			
 			@Override
@@ -109,7 +108,6 @@ public class DrawingPanel extends JPanel {
 				super.mouseMoved(e);
 				mousePosition = e.getPoint();
 				repaint();
-				//repaint(e.getX() -brushSize*2,e.getY()-brushSize*2,brushSize * 3,brushSize*3);
 			}
 
 		});
@@ -207,7 +205,7 @@ public class DrawingPanel extends JPanel {
 			}
 		}
 
-		lastPoint = null;
+		/*lastPoint = null;
 		if (currentStroke != null) {
 			for (StrokePoint p : currentStroke.points) {
 				g2.setColor(currentStroke.getColour());
@@ -234,7 +232,8 @@ public class DrawingPanel extends JPanel {
 				}
 				lastPoint = p;
 			}
-		}
+		}*/
+		updateDrawing();
 		repaint();
 		
 	}

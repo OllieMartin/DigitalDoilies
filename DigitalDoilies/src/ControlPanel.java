@@ -73,8 +73,10 @@ public class ControlPanel extends JPanel {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				drawingPanel.changeSectors(sectorSlider.getValue());
 				sectorLabel.setText("Number of sectors (" + sectorSlider.getValue() + ")");
+				if (!sectorSlider.getValueIsAdjusting()) {
+					drawingPanel.changeSectors(sectorSlider.getValue());
+				}
 			}
 
 		});
@@ -133,7 +135,7 @@ public class ControlPanel extends JPanel {
 			}
 
 		});
-		
+
 		deleteButton = new JButton("Delete");
 		deleteButton.addActionListener(new ActionListener() {
 

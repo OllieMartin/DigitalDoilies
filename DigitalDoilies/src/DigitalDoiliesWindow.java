@@ -1,6 +1,7 @@
 import java.awt.Dimension;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /**
  * The main window of the application which holds the main container for its components
@@ -13,7 +14,11 @@ public class DigitalDoiliesWindow extends JFrame {
 
 	// Main method creates a new digital doilies window
 	public static void main(String args[]) {
-		new DigitalDoiliesWindow();
+		SwingUtilities.invokeLater( new Runnable() { 
+			public void run() {  
+				new DigitalDoiliesWindow();
+			}
+		});
 	}
 
 	private static final int GALLERY_WIDTH = 200; // Default width for the gallery panel in pixels
