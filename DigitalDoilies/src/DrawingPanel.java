@@ -3,7 +3,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -17,10 +16,11 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class DrawingPanel extends JPanel {
 
-	private BufferedImage drawing;
+	private BufferedImage drawing; // Stores the current drawn image
+	
 	private Point mousePosition; // The current position of the mouse on the drawing panel, null if the mouse is elsewhere
-	private Stack<Stroke> strokes;
-	private Stroke currentStroke;
+	private Stroke currentStroke; // The current stroke being drawn if there is one, null if not
+	private Stack<Stroke> strokes; // A stack of all the strokes that make up the drawing
 
 	private int numberOfSectors; // The current number of sectors being used to draw
 	private boolean showSectors; // True if the sector lines should be drawn, otherwise false
@@ -42,10 +42,13 @@ public class DrawingPanel extends JPanel {
 	 */
 	public DrawingPanel(int initialSectors, int initialBrushSize) {
 
-		this.brushSize = initialBrushSize;
-		this.brushColour = DEFAULT_BRUSH_COLOUR;
+		// Setup panel
+		
 		this.setBackground(DEFAULT_BACKGROUND_COLOUR);
 		
+		this.brushColour = DEFAULT_BRUSH_COLOUR;
+		this.brushSize = initialBrushSize;
+
 		this.reflect = false;
 		this.mousePosition = null;
 		this.showSectors = true;
@@ -57,6 +60,7 @@ public class DrawingPanel extends JPanel {
 		this.changeSectors(initialSectors);
 		
 		// Add listener for resizing of this drawing panel
+		
 		this.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				refreshDrawing();
@@ -64,156 +68,206 @@ public class DrawingPanel extends JPanel {
 		});
 		
 		// Add mouse listeners for the panel
+		
 		this.addMouseMotionListener(new DrawingPanelMouseAdapter());
 		this.addMouseListener(new DrawingPanelMouseAdapter());
 	
 		// Perform a full refresh of the drawing to be displayed
+		
 		this.refreshDrawing();
 		
 	}
 	
-	private void updateDrawing() {
-	
-		Graphics2D g2 = (Graphics2D) drawing.getGraphics();
-		g2.setColor(Color.WHITE);
+	private void drawStroke(Stroke stroke) {
 		
+		Graphics2D g2;		
 		StrokePoint lastPoint;
-
-		lastPoint = null;
-		if (currentStroke != null) {
-			for (StrokePoint p : currentStroke.points) {
-				g2.setColor(currentStroke.getColour());
-				g2.setStroke(new BasicStroke(currentStroke.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		
+		if (stroke != null) {
+			
+			g2 = (Graphics2D) drawing.getGraphics();
+			lastPoint = null;
+			
+			for (StrokePoint p : stroke.points) {
+				
+				g2.setColor(stroke.getColour());
+				g2.setStroke(new BasicStroke(stroke.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 				for (int i = 0; i < numberOfSectors; i++) {
-
-					if (currentStroke.points.size() == 1) {
-						g2.fillOval(getWidth()/2 - currentStroke.points.get(0).x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
-						if (currentStroke.getReflected()) {
-							g2.fillOval(getWidth()/2 - currentStroke.points.get(0).reflection.x - currentStroke.getBrushSize()/2, getHeight()/2 - currentStroke.points.get(0).reflection.y - currentStroke.getBrushSize()/2, currentStroke.getBrushSize(), currentStroke.getBrushSize());
-						}
-					}
 					
 					if (lastPoint != null) {
+						
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
-						if (currentStroke.getReflected()) {
+						if (stroke.getReflected()) {
 							g2.drawLine(getWidth()/2 - p.reflection.x, getHeight()/2 - p.reflection.y, getWidth()/2 - lastPoint.reflection.x, getHeight()/2 - lastPoint.reflection.y);
 						}
+						
+					} else if (stroke.points.size() == 1) {
+						
+						g2.fillOval(getWidth()/2 - stroke.points.get(0).x - stroke.getBrushSize()/2, getHeight()/2 - stroke.points.get(0).y - stroke.getBrushSize()/2, stroke.getBrushSize(), stroke.getBrushSize());
+						if (stroke.getReflected()) {
+							g2.fillOval(getWidth()/2 - stroke.points.get(0).reflection.x - stroke.getBrushSize()/2, getHeight()/2 - stroke.points.get(0).reflection.y - stroke.getBrushSize()/2, stroke.getBrushSize(), stroke.getBrushSize());
+						}
+						
 					}
-
-
+					
 					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
 				}
+				
 				lastPoint = p;
 			}
 		}
+	}
+	
+	private void drawSectors() {
+		
+		Graphics2D g2 = (Graphics2D) drawing.getGraphics();
+		
+		g2.setColor(DEFAULT_BRUSH_COLOUR);
+		
+		for (int i = 0; i < numberOfSectors; i++) {
+			g2.drawLine(this.getWidth()/2, this.getHeight()/2, this.getWidth()/2, this.getHeight()/6);
+			g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
+		}
+		
+	}
+	
+	private void updateDrawing() {
+		
+		drawStroke(currentStroke);
+
 		repaint();
 	}
 	
 	private void refreshDrawing() {
-		drawing = new BufferedImage(Math.max(this.getWidth(), 1), Math.max(this.getHeight(),1),  BufferedImage.TYPE_INT_RGB);
 		
-		StrokePoint lastPoint;
+		drawing = new BufferedImage(Math.max(this.getWidth(), 1), Math.max(this.getHeight(),1),  BufferedImage.TYPE_INT_RGB);
 
 		Graphics2D g2 = (Graphics2D) drawing.getGraphics();
-		//g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setColor(Color.WHITE);
+		
+		// Set the correct background colour of the drawing
+		g2.setColor(DEFAULT_BACKGROUND_COLOUR);
+		g2.fillRect(0,0,drawing.getWidth(),drawing.getHeight());
 
+		// Draw sector lines of that option is enabled
 		if (showSectors) {
-			for (int i = 0; i < numberOfSectors; i++) {
-				g2.drawLine(this.getWidth()/2, this.getHeight()/2, this.getWidth()/2, this.getHeight()/6);
-				g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-			}
+			drawSectors();
 		}
 
+		// Draw all the strokes to the drawing
 		for (Stroke s : strokes) {
-			lastPoint = null;
-
-			for (StrokePoint p : s.points) {
-				g2.setColor(s.getColour());
-				g2.setStroke(new BasicStroke(s.getBrushSize(),BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-				for (int i = 0; i < numberOfSectors; i++) {
-
-					if (s.points.size() == 1) {
-						g2.fillOval(getWidth()/2 - s.points.get(0).x - s.getBrushSize()/2, getHeight()/2 - s.points.get(0).y - s.getBrushSize()/2, s.getBrushSize(), s.getBrushSize());
-						if (s.getReflected()) {
-							g2.fillOval(getWidth()/2 - s.points.get(0).reflection.x - s.getBrushSize()/2, getHeight()/2 - s.points.get(0).reflection.y - s.getBrushSize()/2, s.getBrushSize(), s.getBrushSize());
-						}
-					}
-					
-					if (lastPoint != null) {
-						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
-						if (s.getReflected()) {
-							g2.drawLine(getWidth()/2 - p.reflection.x, getHeight()/2 - p.reflection.y, getWidth()/2 - lastPoint.reflection.x, getHeight()/2 - lastPoint.reflection.y);
-						}
-					}
-					g2.rotate(Math.PI*2/numberOfSectors, this.getWidth()/2,this.getHeight()/2);
-				}
-				lastPoint = p;
-			}
+			drawStroke(s);
 		}
 		
+		// Updates the drawing with any strokes currently being drawn and calls repaint()
 		updateDrawing();
-		
-		repaint();
 		
 	}
 
+	/**
+	 * <p>Changes the number of sectors being used to draw to the specified value</p>
+	 * 
+	 * <p>This also re-draws the image entirely</p>
+	 * 
+	 * @param numberOfSectors
+	 */
 	public void changeSectors(int numberOfSectors) {
 
 		this.numberOfSectors = numberOfSectors;
 		refreshDrawing();
 	}
 
+	/**
+	 * Toggles if the sector lines should be displayed and re-draws the image
+	 */
 	public void toggleSectors() {
 
 		showSectors = !showSectors;
 		refreshDrawing();
 	}
 
+	/**
+	 * Gets the current size of brush being used
+	 * 
+	 * @return The size of the brush being used
+	 */
 	public int getBrushSize() {
 		return brushSize;
 	}
 
+	/**
+	 * Sets the size of the brush to the specified value
+	 * 
+	 * @param brushSize
+	 */
 	public void setBrushSize(int brushSize) {
 		this.brushSize = brushSize;
 	}
 
+	/**
+	 * Get the current colour of the brush
+	 * 
+	 * @return The current colour of the brush
+	 */
 	public Color getBrushColour() {
 		return brushColour;
 	}
 
+	/**
+	 * Sets the current colour of the brush
+	 * 
+	 * @param colour
+	 */
 	public void setBrushColour(Color colour) {
 		this.brushColour = colour;
 	}
 
+	/**
+	 * Toggles if subsequently drawn points should be reflected
+	 */
 	public void toggleReflection() {
 		reflect = !reflect;
 	}
 
+	/**
+	 * Clears all points from the image and causes a re-draw
+	 */
 	public void clearPoints() {
+		
 		while (!strokes.isEmpty()) {
 			strokes.pop();
 		}
 		currentStroke = null;
+		
 		refreshDrawing();
 	}
 
+	/**
+	 * Gets the number of sectors currently being used to draw on the image
+	 * @return
+	 */
 	public int getSectors() {
 		return numberOfSectors;
 	}
 
+	/**
+	 * Undoes the last brush stroke and causes a re-draw
+	 */
 	public void undo() {
+		
 		if (!strokes.isEmpty() ) {
-
 			strokes.pop();
 			refreshDrawing();
-
 		}
+		
 	}
 
-	public Image getImage() {
+	/**
+	 * Creates an exact copy of the image being displayed in the drawing panel
+	 * 
+	 * @return An exact copy of the image being displayed in the drawing panel
+	 */
+	public BufferedImage getImage() {
 		BufferedImage image = new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_RGB);
 		paintComponent(image.getGraphics());
 		return image;
@@ -227,6 +281,7 @@ public class DrawingPanel extends JPanel {
 		
 		g2.drawImage(drawing, 0, 0, null);
 
+		// Displays a transparent representation of the brush size and colour at the current mouse position
 		if (mousePosition != null) {
 
 			g2.setColor(new Color(getBrushColour().getRed(),getBrushColour().getGreen(),getBrushColour().getBlue(),BRUSH_HOVER_TRANSPARENCY));
@@ -235,9 +290,19 @@ public class DrawingPanel extends JPanel {
 		}
 
 	}
-	
+
+	/**
+	 * <p>The listener to be used for the drawing panel. Acts as a mouse motion listener and mouse listener.</p>
+	 * 
+	 * <p>Allows strokes to be drawn when appropriate mouse actions are taken.
+	 * Also updates the current location of the mouse when it is hovering over the panel.</p>
+	 * 
+	 * @author Oliver Martin (ojm1g16)
+	 *
+	 */
 	private class DrawingPanelMouseAdapter extends MouseAdapter {
 		
+		// Draws a new point at the mouse location
 		private void mouseDraw(MouseEvent e) {
 			
 			if (currentStroke == null) currentStroke = new Stroke(brushSize, brushColour, reflect);
@@ -250,6 +315,7 @@ public class DrawingPanel extends JPanel {
 			
 		}
 		
+		// Finishes the current stroke being drawn and adds it to the stack
 		private void finishStroke() {
 			
 			if (currentStroke != null) strokes.push(currentStroke);

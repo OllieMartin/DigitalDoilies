@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -22,14 +23,21 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+/**
+ * The gallery panel to display saved drawings by the user
+ * 
+ * @author Oliver Martin (ojm1g16)
+ *
+ */
 @SuppressWarnings("serial")
 public class GalleryPanel extends JPanel {
 
-	private JScrollPane galleryScroll; // A scroll panel to contain the gallery panel
-	private JPanel imagePanel;
-	private int displayedImageWidth;  // The width for images added to the gallery taking into account the scroll-bar
+	private JScrollPane galleryScroll; // A scroll panel to contain the image panel
+	private JPanel imagePanel; // The image panel contains the saved images
 	private List<JToggleButton> galleryImages; // The list of images added to the gallery
 	private JButton deleteButton; // Button to delete selected images in the gallery
+	
+	private int displayedImageWidth;  // The width for images added to the gallery taking into account the scroll-bar
 
 	private static final int APPROX_SROLL_BAR_WIDTH = 20; // Approximate width of the vertical scroll bar used to properly place the gallery images
 	private static final int MAXIMUM_GALLERY_IMAGES = 12; // The maximum number of images allowed in the gallery
@@ -44,20 +52,21 @@ public class GalleryPanel extends JPanel {
 	 * @param panelWidth
 	 */
 	public GalleryPanel(int panelWidth) {
-
+		
+		this.galleryImages = new ArrayList<JToggleButton>();
+		this.displayedImageWidth = panelWidth - APPROX_SROLL_BAR_WIDTH;
+		
 		this.setLayout(new BorderLayout());
+		
 		imagePanel = new JPanel();
 		imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.PAGE_AXIS));
+		
 		galleryScroll = new JScrollPane(imagePanel);
 		galleryScroll.setMinimumSize(new Dimension(panelWidth,panelWidth));
 		galleryScroll.setPreferredSize(new Dimension(panelWidth,panelWidth));
 		galleryScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		galleryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
 		galleryScroll.getVerticalScrollBar().setUnitIncrement(SCROLL_FACTOR);
-		this.add(galleryScroll, BorderLayout.CENTER);
-
-		this.galleryImages = new ArrayList<JToggleButton>();
-		this.displayedImageWidth = panelWidth - APPROX_SROLL_BAR_WIDTH;
 		
 		deleteButton = new JButton("Delete");
 		deleteButton.addActionListener(new ActionListener() {
@@ -69,56 +78,89 @@ public class GalleryPanel extends JPanel {
 
 		});
 		
+		this.add(galleryScroll, BorderLayout.CENTER);
 		this.add(deleteButton, BorderLayout.SOUTH);
 
 	}
 
+	/**
+	 * Adds an image to the gallery if the maximum number of images has not been reached
+	 * 
+	 * @param image
+	 */
 	public void addImage(BufferedImage image) {
 		if (galleryImages.size() < MAXIMUM_GALLERY_IMAGES) {
-
-			Image scaledImage;
-
-			JToggleButton newSave = new JToggleButton();
-			Border line = new LineBorder(Color.BLACK);
-			Border margin = new EmptyBorder(GALLERY_VERTICAL_PADDING, GALLERY_HORIZONTAL_PADDING, GALLERY_VERTICAL_PADDING, GALLERY_HORIZONTAL_PADDING);
-			Border compound = new CompoundBorder(line, margin);
+			
+			Image scaledImage; // The scaled image to be displayed in the gallery
+			BufferedImage selectedImage; // The image to be displayed when the image is selected in the gallery
+			
+			JToggleButton newSave; // The toggle button which will be used to display and select the image
+			
+			Border line; // The outline around the image button
+			Border margin; // The margin to be used around the image in the button;
+			Border compound; // The compound border comprised of line and margin
+			
+			float iwidth; // The width of the original image
+			float iheight; // The height of the original image
+			
+			Graphics2D g2; // Graphics object to be used when creating selected image
+			
+			newSave = new JToggleButton();
+			
+			line = new LineBorder(Color.BLACK);
+			margin = new EmptyBorder(GALLERY_VERTICAL_PADDING, GALLERY_HORIZONTAL_PADDING, GALLERY_VERTICAL_PADDING, GALLERY_HORIZONTAL_PADDING);
+			compound = new CompoundBorder(line, margin);
 			newSave.setBorder(compound);
 
-			float iwidth = image.getWidth();
-			float iheight = image.getHeight();
+			iwidth = image.getWidth();
+			iheight = image.getHeight();
 
+			// Create the scaled image from the original image
 			scaledImage = image.getScaledInstance(displayedImageWidth,(int) (displayedImageWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
 
+			// Setup the image in the toggle button
 			newSave.setIcon(new ImageIcon(scaledImage));
 			newSave.setHorizontalAlignment(SwingConstants.CENTER);
 			newSave.setVerticalAlignment(SwingConstants.CENTER);
 
-			BufferedImage selectedImage = new BufferedImage(displayedImageWidth,(int) (displayedImageWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
-			Graphics2D g2 = (Graphics2D) selectedImage.getGraphics();
-			g2.drawImage(scaledImage,0,0, this);
+			// Create the selected image using the scaled image and drawing a cross over it from corner to corner
+			selectedImage = new BufferedImage(displayedImageWidth,(int) (displayedImageWidth*(iheight/iwidth)),BufferedImage.TYPE_INT_RGB);
+			g2 = (Graphics2D) selectedImage.getGraphics();
+			g2.drawImage(scaledImage,0,0, null);
 			g2.setColor(Color.RED);
 			g2.setStroke(new BasicStroke(IMAGE_SELECT_STROKE ,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2.drawLine(0, 0, displayedImageWidth, (int) (displayedImageWidth*(iheight/iwidth)));
 			g2.drawLine(displayedImageWidth, 0, 0, (int) (displayedImageWidth*(iheight/iwidth)));
 
+			// Set the selected icon to selectedImage
 			newSave.setSelectedIcon(new ImageIcon(selectedImage));
 
+			// Add the new button to the image panel and the list of all images
 			imagePanel.add(newSave);
 			galleryImages.add(newSave);
 
+			// Refresh this component
 			this.updateUI();
 		}
 	}
 
+	/**
+	 * Deletes all selected images in the gallery
+	 */
 	public void deleteSelected() {
-		List<JToggleButton> toRemove = new ArrayList<JToggleButton>();
-		for (JToggleButton image : galleryImages) {
-			if (image.isSelected()) {
-				imagePanel.remove(image);
-				toRemove.add(image);
+		
+		JToggleButton currentImage; // Stores the image currently being processed
+		Iterator<JToggleButton> it = galleryImages.iterator();
+		
+		while (it.hasNext()) {
+			
+			currentImage = it.next();
+			if (currentImage.isSelected()) {
+				imagePanel.remove(currentImage);
+				it.remove();
 			}
 		}
-		galleryImages.removeAll(toRemove);
+		
 		this.updateUI();
 	}
 
