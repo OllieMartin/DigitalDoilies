@@ -1,14 +1,20 @@
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
@@ -19,13 +25,17 @@ import javax.swing.border.LineBorder;
 @SuppressWarnings("serial")
 public class GalleryPanel extends JPanel {
 
+	private JScrollPane galleryScroll; // A scroll panel to contain the gallery panel
+	private JPanel imagePanel;
 	private int displayedImageWidth;  // The width for images added to the gallery taking into account the scroll-bar
 	private List<JToggleButton> galleryImages; // The list of images added to the gallery
+	private JButton deleteButton; // Button to delete selected images in the gallery
 
 	private static final int APPROX_SROLL_BAR_WIDTH = 20; // Approximate width of the vertical scroll bar used to properly place the gallery images
 	private static final int MAXIMUM_GALLERY_IMAGES = 12; // The maximum number of images allowed in the gallery
 	private static final int GALLERY_VERTICAL_PADDING = 1; // The number of pixels above and below each image in the gallery
 	private static final int GALLERY_HORIZONTAL_PADDING = 0; // The number of pixels left and right of each image in the gallery
+	private static final int SCROLL_FACTOR = 10; // The number of lines scrolled on the gallery scroll bar
 
 	/**
 	 * Create a new gallery panel with the specified width
@@ -34,10 +44,31 @@ public class GalleryPanel extends JPanel {
 	 */
 	public GalleryPanel(int panelWidth) {
 
-		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		this.setLayout(new BorderLayout());
+		imagePanel = new JPanel();
+		imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.PAGE_AXIS));
+		galleryScroll = new JScrollPane(imagePanel);
+		galleryScroll.setMinimumSize(new Dimension(panelWidth,panelWidth));
+		galleryScroll.setPreferredSize(new Dimension(panelWidth,panelWidth));
+		galleryScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		galleryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
+		galleryScroll.getVerticalScrollBar().setUnitIncrement(SCROLL_FACTOR);
+		this.add(galleryScroll, BorderLayout.CENTER);
 
 		this.galleryImages = new ArrayList<JToggleButton>();
 		this.displayedImageWidth = panelWidth - APPROX_SROLL_BAR_WIDTH;
+		
+		deleteButton = new JButton("Delete");
+		deleteButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				deleteSelected();	
+			}
+
+		});
+		
+		this.add(deleteButton, BorderLayout.SOUTH);
 
 	}
 
@@ -71,7 +102,7 @@ public class GalleryPanel extends JPanel {
 
 			newSave.setSelectedIcon(new ImageIcon(selectedImage));
 
-			this.add(newSave);
+			imagePanel.add(newSave);
 			galleryImages.add(newSave);
 
 			this.updateUI();
@@ -82,7 +113,7 @@ public class GalleryPanel extends JPanel {
 		List<JToggleButton> toRemove = new ArrayList<JToggleButton>();
 		for (JToggleButton image : galleryImages) {
 			if (image.isSelected()) {
-				this.remove(image);
+				imagePanel.remove(image);
 				toRemove.add(image);
 			}
 		}

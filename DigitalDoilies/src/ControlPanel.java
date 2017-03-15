@@ -31,7 +31,7 @@ public class ControlPanel extends JPanel {
 	private JButton colourButton; // Button to show JColorChooser to set brush colour
 	private JToggleButton sectorButton; // Button to toggle showing the sector lines
 	private JButton saveButton; // Button to save current image to the gallery
-	private JButton deleteButton; // Button to delete selected images in the gallery
+//	private JButton deleteButton; // Button to delete selected images in the gallery
 	private JLabel sectorLabel; // Label to identify the sector slider
 	private JLabel brushSizeLabel; // Label to identify the brush size slider
 
@@ -43,7 +43,7 @@ public class ControlPanel extends JPanel {
 	 */
 	public ControlPanel(DrawingPanel drawingPanel, GalleryPanel galleryPanel) {
 
-		this.setLayout(new GridLayout(11,1));
+		this.setLayout(new GridLayout(10,1));
 
 		reflectButton = new JToggleButton("Reflect");
 		reflectButton.addActionListener(new ActionListener() {
@@ -136,15 +136,15 @@ public class ControlPanel extends JPanel {
 
 		});
 
-		deleteButton = new JButton("Delete");
-		deleteButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				galleryPanel.deleteSelected();	
-			}
-
-		});
+//		deleteButton = new JButton("Delete");
+//		deleteButton.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				galleryPanel.deleteSelected();	
+//			}
+//
+//		});
 
 		this.add(undoButton);
 		this.add(clearButton);
@@ -156,7 +156,7 @@ public class ControlPanel extends JPanel {
 		this.add(sectorButton);
 		this.add(colourButton);
 		this.add(saveButton);
-		this.add(deleteButton);
+		//this.add(deleteButton);
 	}
 
 }
