@@ -30,7 +30,6 @@ public class DrawingPanel extends JPanel {
 
 	private boolean reflect; // If new drawn points should be reflected within their respective sectors
 
-	private static final int DEFAULT_BRUSH_SIZE = 5; // The default size of the brush
 	private static final int MINIMUM_PANEL_SIZE = 200; // The minimum width/height for the drawing panel object
 	private static final Color DEFAULT_BACKGROUND_COLOUR = Color.BLACK; // The background colour to be used for the drawing panel
 	private static final Color DEFAULT_BRUSH_COLOUR = Color.WHITE; // The default colour to be selected for the brush
@@ -41,87 +40,36 @@ public class DrawingPanel extends JPanel {
 	 * 
 	 * @param defaultNumberOfSectors The number of sectors to be displayed by default
 	 */
-	public DrawingPanel(int defaultNumberOfSectors) {
+	public DrawingPanel(int initialSectors, int initialBrushSize) {
 
-		reflect = false;
-		mousePosition = null;
-		brushSize = DEFAULT_BRUSH_SIZE;
-		brushColour = DEFAULT_BRUSH_COLOUR;
-		showSectors = true;
-		strokes = new Stack<Stroke>();
-		refreshDrawing();
+		this.brushSize = initialBrushSize;
+		this.brushColour = DEFAULT_BRUSH_COLOUR;
 		this.setBackground(DEFAULT_BACKGROUND_COLOUR);
+		
+		this.reflect = false;
+		this.mousePosition = null;
+		this.showSectors = true;
+		
+		this.strokes = new Stack<Stroke>();
+		
 		this.setMinimumSize(new Dimension(MINIMUM_PANEL_SIZE, MINIMUM_PANEL_SIZE));
 		
+		this.changeSectors(initialSectors);
+		
+		// Add listener for resizing of this drawing panel
 		this.addComponentListener(new ComponentAdapter() {
-			
 			public void componentResized(ComponentEvent e) {
 				refreshDrawing();
-				repaint();
 	        }
-			
 		});
 		
-		this.addMouseMotionListener(new MouseAdapter() {
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				super.mouseDragged(e);
-				if (currentStroke == null) currentStroke = new Stroke(brushSize, brushColour, reflect);
-
-				if (currentStroke.getReflected()) {
-					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), e.getX() - getWidth()/2, getHeight()/2 - e.getY()));
-				} else {
-					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
-				}
-
-				mousePosition = null;
-				updateDrawing();
-			}
-		});
+		// Add mouse listeners for the panel
+		this.addMouseMotionListener(new DrawingPanelMouseAdapter());
+		this.addMouseListener(new DrawingPanelMouseAdapter());
+	
+		// Perform a full refresh of the drawing to be displayed
+		this.refreshDrawing();
 		
-		this.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				super.mouseReleased(e);
-				if (currentStroke != null) strokes.push(currentStroke);
-				currentStroke = null;
-				updateDrawing();
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-				super.mousePressed(e);
-				if (currentStroke == null) currentStroke = new Stroke(brushSize, brushColour, reflect);
-				if (currentStroke.getReflected()) {
-					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), e.getX() - getWidth()/2, getHeight()/2 - e.getY()));
-				} else {
-					currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
-				}
-				updateDrawing();
-			}
-
-		});
-		this.addMouseMotionListener(new MouseAdapter() {
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				super.mouseMoved(e);
-				mousePosition = e.getPoint();
-				repaint();
-			}
-
-		});
-		this.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseExited(MouseEvent e) {
-				super.mouseExited(e);
-				mousePosition = null;
-				repaint();
-			}
-
-		});
-		changeSectors(defaultNumberOfSectors);
 	}
 	
 	private void updateDrawing() {
@@ -286,6 +234,75 @@ public class DrawingPanel extends JPanel {
 
 		}
 
+	}
+	
+	private class DrawingPanelMouseAdapter extends MouseAdapter {
+		
+		private void mouseDraw(MouseEvent e) {
+			
+			if (currentStroke == null) currentStroke = new Stroke(brushSize, brushColour, reflect);
+			
+			if (currentStroke.getReflected()) {
+				currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY(), e.getX() - getWidth()/2, getHeight()/2 - e.getY()));
+			} else {
+				currentStroke.points.add(new StrokePoint(getWidth()/2 - e.getX(), getHeight()/2 - e.getY()));
+			}
+			
+		}
+		
+		private void finishStroke() {
+			
+			if (currentStroke != null) strokes.push(currentStroke);
+			currentStroke = null;
+			
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			
+			super.mousePressed(e);
+			mouseDraw(e);
+			updateDrawing();
+			
+		}
+		
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			
+			super.mouseDragged(e);
+			mouseDraw(e);
+			mousePosition = null;
+			updateDrawing();
+			
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			
+			super.mouseReleased(e);
+			finishStroke();
+			updateDrawing();
+			
+		}
+		
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			
+			super.mouseMoved(e);
+			mousePosition = e.getPoint();
+			repaint();
+			
+		}
+		
+		@Override
+		public void mouseExited(MouseEvent e) {
+			
+			super.mouseExited(e);
+			mousePosition = null;
+			repaint();
+			
+		}
+		
 	}
 
 }

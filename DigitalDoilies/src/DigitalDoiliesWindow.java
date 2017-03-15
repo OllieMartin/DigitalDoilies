@@ -21,7 +21,6 @@ public class DigitalDoiliesWindow extends JFrame {
 		});
 	}
 
-	private static final int GALLERY_WIDTH = 200; // Default width for the gallery panel in pixels
 	private static final int DEFAULT_WIDTH = 1000; // Default width for the main window pixels
 	private static final int DEFAULT_HEIGHT = 500; // Default height for the main window pixels
 	private static final int MINIMUM_WIDTH = 750; // Minimum width for the main window pixels
@@ -39,7 +38,7 @@ public class DigitalDoiliesWindow extends JFrame {
 
 		super("Digital Doilies");
 
-		mainPane = new DigitalDoiliesPanel(GALLERY_WIDTH);
+		mainPane = new DigitalDoiliesPanel();
 		this.add(mainPane);
 
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
