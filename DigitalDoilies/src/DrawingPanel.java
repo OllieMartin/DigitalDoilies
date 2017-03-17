@@ -78,6 +78,7 @@ public class DrawingPanel extends JPanel {
 		
 	}
 	
+	// Draws a stroke object to the image
 	private void drawStroke(Stroke stroke) {
 		
 		Graphics2D g2;		
@@ -96,14 +97,14 @@ public class DrawingPanel extends JPanel {
 				for (int i = 0; i < numberOfSectors; i++) {
 					
 					if (lastPoint != null) {
-						
+						// If there is more than one point in the stroke draw a series of lines
 						g2.drawLine(getWidth()/2 - p.x, getHeight()/2 - p.y, getWidth()/2 - lastPoint.x, getHeight()/2 - lastPoint.y);
 						if (stroke.getReflected()) {
 							g2.drawLine(getWidth()/2 - p.reflection.x, getHeight()/2 - p.reflection.y, getWidth()/2 - lastPoint.reflection.x, getHeight()/2 - lastPoint.reflection.y);
 						}
 						
 					} else if (stroke.points.size() == 1) {
-						
+						// If there is only one point in the stroke draw a circle
 						g2.fillOval(getWidth()/2 - stroke.points.get(0).x - stroke.getBrushSize()/2, getHeight()/2 - stroke.points.get(0).y - stroke.getBrushSize()/2, stroke.getBrushSize(), stroke.getBrushSize());
 						if (stroke.getReflected()) {
 							g2.fillOval(getWidth()/2 - stroke.points.get(0).reflection.x - stroke.getBrushSize()/2, getHeight()/2 - stroke.points.get(0).reflection.y - stroke.getBrushSize()/2, stroke.getBrushSize(), stroke.getBrushSize());
@@ -119,6 +120,7 @@ public class DrawingPanel extends JPanel {
 		}
 	}
 	
+	// Draws the sector lines on the image
 	private void drawSectors() {
 		
 		Graphics2D g2 = (Graphics2D) drawing.getGraphics();
@@ -132,6 +134,7 @@ public class DrawingPanel extends JPanel {
 		
 	}
 	
+	// Updates the drawing with the latest stroke
 	private void updateDrawing() {
 		
 		drawStroke(currentStroke);
@@ -139,6 +142,7 @@ public class DrawingPanel extends JPanel {
 		repaint();
 	}
 	
+	// Re-paints the whole drawing
 	private void refreshDrawing() {
 		
 		drawing = new BufferedImage(Math.max(this.getWidth(), 1), Math.max(this.getHeight(),1),  BufferedImage.TYPE_INT_RGB);

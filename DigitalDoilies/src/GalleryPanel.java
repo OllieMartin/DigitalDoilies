@@ -53,6 +53,8 @@ public class GalleryPanel extends JPanel {
 	 */
 	public GalleryPanel(int panelWidth) {
 		
+		// Initialise and set defaults
+		
 		this.galleryImages = new ArrayList<JToggleButton>();
 		this.displayedImageWidth = panelWidth - APPROX_SROLL_BAR_WIDTH;
 		
@@ -68,6 +70,8 @@ public class GalleryPanel extends JPanel {
 		galleryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
 		galleryScroll.getVerticalScrollBar().setUnitIncrement(SCROLL_FACTOR);
 		
+		// Setup delete button with appropriate listener
+		
 		deleteButton = new JButton("Delete");
 		deleteButton.addActionListener(new ActionListener() {
 
@@ -78,6 +82,7 @@ public class GalleryPanel extends JPanel {
 
 		});
 		
+		// Add the items to the pane
 		this.add(galleryScroll, BorderLayout.CENTER);
 		this.add(deleteButton, BorderLayout.SOUTH);
 
